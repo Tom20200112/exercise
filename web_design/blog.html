@@ -1,0 +1,110 @@
+<html>
+   <head>
+      <meta charset="UTF-8" >
+      <title>美好的一天</title>
+   </head>
+   <body>
+      <style>
+         #before {
+            background-color: skyblue;
+         }
+         #during {
+            background-color: lightgreen;
+         }
+         #after {
+            background-color: tomato;
+         }
+         h2 {
+            background-color: violet;
+         }
+      </style>
+      <h1 style="background-color: rgba(255, 251, 11, 0.87);">计算器和时钟养成记</h1>
+      作者：<b style="color:blueviolet;"><i>王小二</i></b> <sup>*</sup> 时间：<i style="color: purple;">2021年7月2日</i>
+      <div id="before">
+      <h2>发明前</h2>
+      <p>在发明前，我也不知道能不能做成</p>
+      列表：王小二的动机
+      <ol>
+         <li>学习CSS</li>
+         <li>学习html</li>
+         <li>学习JS</li>
+         <li>写计算器和时钟</li>
+      </ol>
+      <br>
+      <hr>
+      </div>
+      <div id="during">
+      <h2>发明中</h2>
+      <table border="1">
+         王小二艰难历程表
+         <tr>
+            <td>事件</td><td>感悟</td>
+         </tr>
+         <tr>
+            <td>看CSS</td><td>一夜没睡</td>
+         </tr>
+         <tr>
+            <td>看html</td><td>一夜没睡</td>
+         </tr>
+      </table>
+      <p>查了很多资料，好累但很快乐</p>
+      <br>
+      <hr>
+      </div>
+      <div id="after">
+      <h2>发明后</h2>
+      <p>终于做好了</p>
+      <form>
+         操作数1：<input type="text" id="operand1">
+         <br>
+         操作数2：<input type="text" id="operand2">
+         <br/>
+         <input type="radio" name="op">加
+         <input type="radio" name="op">减
+         <input type="radio" name="op">乘
+         <input type="radio" name="op">除
+         <input type="radio" name="op">模
+         <br>
+         密码：<input type="password"><br/>
+         结果：<span id="result">xxxx</span><br>
+         <input type="button" value="计算" name="submit" onclick="run_calculator()">
+         <br/>
+      </form>
+      <script>
+         function add(x,y){
+            return x+y
+         }//加
+         function sub(x,y){
+            return x-y
+         }//减
+         function multiply(x,y){
+            return x*y
+         }//乘
+         function divide(x,y){
+            return x/y
+         }//除
+         function mod(x,y){
+            return x%y
+         }//模
+         function run_calculator(){
+            var operand1=document.getElementById("operand1")
+            var x=operand1.value-0
+            var operand2=document.getElementById("operand2")
+            var y=operand2.value-0
+            var i=0
+            var options=document.getElementsByName("op")
+            var found=false
+            while(i<options.length && found==false){
+               if(options[i].checked == true){found=true;}
+               else {i++}
+            }
+            console.log(i)
+            var function_array=[add,sub,multiply,divide,mod]
+            var z=function_array[i](x,y)
+            var result=document.getElementById("result")
+            result.innerHTML=z
+         }
+      </script>
+      </div>
+   </body>
+</html>
