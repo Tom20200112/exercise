@@ -3,10 +3,10 @@
 #define MAXLINE 1000
 
 char line[MAXLINE];
+
 int getaline(char s[], int lim);
 
-int main(void)
-{
+int main(void) {
     int len, n;
 
     scanf("%d", &n);
@@ -20,8 +20,7 @@ int main(void)
     return 0;
 }
 
-int getaline(char s[], int lim)
-{
+int getaline(char s[], int lim) {
     int c, i;
     for (i = 0; i < lim - 1 && (c = getchar()) != EOF && c != '\n'; i++) {
         s[i] = c;

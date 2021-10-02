@@ -1,8 +1,8 @@
 #include <stdio.h>
+
 #define MAXLENGTH 1000
 
-int stringlen(char s[])
-{
+int stringlen(char s[]) {
     int i = 0;
 
     while (s[i] != '\0') {
@@ -12,8 +12,7 @@ int stringlen(char s[])
     return i;
 }
 
-int main()
-{
+int main() {
     char mystring[MAXLENGTH];
     scanf("%s", mystring);
 

@@ -1,7 +1,6 @@
 #include <stdio.h>
 
-int main(void)
-{
+int main(void) {
     int intvar = 2147483647;
     printf("1 intvar=%d\n", intvar);
 

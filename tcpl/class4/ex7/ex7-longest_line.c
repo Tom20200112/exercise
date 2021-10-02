@@ -1,8 +1,8 @@
 #include <stdio.h>
+
 #define MAXLINE 1000
 
-int getaline(char line[], int maxline)
-{
+int getaline(char line[], int maxline) {
     int c, i = 0;
     while ((c = getchar()) != EOF && c != '\n' && i < maxline - 1) {
         line[i] = c;
@@ -17,8 +17,7 @@ int getaline(char line[], int maxline)
     return i;
 }
 
-void copy(char to[], char from[])
-{
+void copy(char to[], char from[]) {
     int j = 0;
 
     for (; from[j] != '\0'; j++) {
@@ -28,8 +27,7 @@ void copy(char to[], char from[])
     to[j] = '\0';
 }
 
-int main(void)
-{
+int main(void) {
     char line[MAXLINE], maxline[MAXLINE];
     int maxlen = 0;
     int len;
@@ -41,6 +39,7 @@ int main(void)
             copy(maxline, line);
         }
     }
+
     if (maxlen > 0) {
         printf("The longest line is: %s\nlength=%d\n", maxline, maxlen);
     }

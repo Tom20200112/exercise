@@ -3,8 +3,7 @@
 #define INWORD 1
 #define OUTWORD 0
 
-int main(void)
-{
+int main(void) {
     int state = OUTWORD;
     int c;
 
@@ -19,7 +18,6 @@ int main(void)
                 state = INWORD;
                 if (c - 'a' >= 0 && c - 'a' <= 25) {
                     c = 'A' + c - 'a';
-
                     letter[c - 'A']++;
                 }
             }
@@ -30,13 +28,14 @@ int main(void)
                 state = OUTWORD;
             }
         }
+
         putchar(c);
     }
-    printf("\n");
 
     for (int j = 0; j < 26; j++) {
         printf("%d, ", letter[j]);
     }
 
+    printf("\n");
     return 0;
 }

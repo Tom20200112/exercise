@@ -1,25 +1,24 @@
 #include <assert.h>
 #include <stdio.h>
 
-int main(void)
-{
-    int n;
-    scanf("%d", &n);
-    float sum = 0;
-    float fac = 1, i = 1;
+// 1 + 1/1! + 1/2! + ... + 1/n!
+// n = [1, ...]
+int main(void) {
+  int n;
+  scanf("%d", &n);
+  if (n <= 0) {
+    printf("n must > 0.\n");
+    return 1;
+  }
 
-    asert(n > 0);
-    if (n == 1) {
-        sum = 1;
-    } else {
-        for (; i <= n; ++i) {
-            fac *= i;
-            sum += 1 / fac;
-        }
-        sum += 1;
-    }
+  float sum = 1;
+  float fac = 1;
+  for (int i = 1; i <= n; i++) {
+    fac *= i;
+    sum += 1 / fac;
+  }
 
-    printf("The sum is %f", sum);
+  printf("%f\n", sum);
 
-    return 0;
+  return 0;
 }
