@@ -1,7 +1,6 @@
 #include <stdio.h>
 
-int main(void)
-{
+int main(void) {
     int number[1001];
     int i, j, k;
 
@@ -28,6 +27,6 @@ int main(void)
         }
     }
 
-	printf("\n");
+    printf("\n");
     return 0;
 }
