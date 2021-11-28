@@ -70,7 +70,110 @@ void refresh(void) {
 	}
 }
 
+int detect_whitewin() {
+	
 
+
+
+	for (int i=0;i<SIZE;i++) {
+		for (int j=0;j<SIZE;j++) {
+			if (aRecordBoard[i][j]==2) {
+					int east=0;
+					int west=0;
+	int south=0;
+	int north=0;
+	int NW=0;
+	int NE=0;
+	int SW=0;
+	int SE=0;
+
+				for (int k=1;aRecordBoard[i][j+k]==2 && j+k<15;k++) {
+					east++;
+				}
+				for (int k=1;aRecordBoard[i][j-k]==2 && j-k>=0;k++) {
+					west++;
+				}
+				for (int k=1;aRecordBoard[i-k][j]==2 && i-k>=0;k++) {
+					north++;
+				}
+				for (int k=1;aRecordBoard[i+k][j]==2 && i+k<15;k++) {
+					south++;
+				}
+				for (int k=1;aRecordBoard[i+k][j+k]==2 && i+k<15 && j+k<15;k++) {
+					SE++;
+				}
+				for (int k=1;aRecordBoard[i-k][j+k]==2 && i-k>=0 && j+k<15;k++) {
+					NE++;
+				}
+				for (int k=1;aRecordBoard[i-k][j-k]==2 && i-k>=0 && j-k>=0;k++) {
+					NW++;
+				}
+				for (int k=1;aRecordBoard[i+k][j-k]==2 && i+k<=15 && j-k>=0;k++) {
+					SW++;
+				}
+				if (east+west+1>=5 || north+south+1>=5 || NW+SE+1>=5 || SW+NE+1>=5) {
+					return 1;
+				}
+			}
+		}
+	}
+
+	return 0;
+
+}
+
+int detect_blackwin() {
+
+
+
+
+	for (int i=0;i<SIZE;i++) {
+		for (int j=0;j<SIZE;j++) {
+			if (aRecordBoard[i][j]==1) {
+					int east=0;
+	int west=0;
+	int south=0;
+	int north=0;
+	int NW=0;
+	int NE=0;
+	int SW=0;
+	int SE=0;
+
+
+				for (int k=1;aRecordBoard[i][j+k]==1 && j+k<15;k++) {
+					east++;
+				}
+				for (int k=1;aRecordBoard[i][j-k]==1 && j-k>=0;k++) {
+					west++;
+				}
+				for (int k=1;aRecordBoard[i-k][j]==1 && i-k>=0;k++) {
+					north++;
+				}
+				for (int k=1;aRecordBoard[i+k][j]==1 && i+k<15;k++) {
+					south++;
+				}
+				for (int k=1;aRecordBoard[i+k][j+k]==1 && i+k<15 && j+k<15;k++) {
+					SE++;
+				}
+				for (int k=1;aRecordBoard[i-k][j+k]==1 && i-k>=0 && j+k<15;k++) {
+					NE++;
+				}
+				for (int k=1;aRecordBoard[i-k][j-k]==1 && i-k>=0 && j-k>=0;k++) {
+					NW++;
+				}
+				for (int k=1;aRecordBoard[i+k][j-k]==1 && i+k<=15 && j-k>=0;k++) {
+					SW++;
+				}
+				if (east+west+1>=5 || north+south+1>=5 || NW+SE+1>=5 || SW+NE+1>=5) {
+					return 1;
+				}
+			}
+		}
+	}
+
+	return 0;
+
+}
 
 int main()
 
@@ -91,7 +194,12 @@ int main()
 		aRecordBoard[SIZE-y[0]][x[0]-'A']=3;
 		recordtoDisplayArray();
 		displayBoard();
+		
 		refresh();
+		if (detect_blackwin()) {
+			printf("Black wins! ");
+			return 0;
+		}
 		
 		printf("White to move: ");
 		getposition(x,y);
@@ -102,9 +210,14 @@ int main()
 		aRecordBoard[SIZE-y[0]][x[0]-'A']=4;
 		recordtoDisplayArray();
 		displayBoard();
+		
 		move++;
 
 		refresh();
+		if (detect_whitewin()) {
+			printf("White wins! ");
+			return 0;
+		}
 	}
 	/*
     initRecordBorard();
