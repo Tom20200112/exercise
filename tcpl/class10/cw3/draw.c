@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,24 @@
 void initRecordBorard(void);
 void recordtoDisplayArray(void);
 void displayBoard(void);
+
+struct connected {
+    int color;  // 1 for black, 2 for white
+
+    int x;
+    int y;
+
+    int N;
+    int S;
+    int E;
+    int W;
+    int NE;
+    int NW;
+    int SE;
+    int SW;
+};
+
+struct connected pieces[SIZE * SIZE];
 
 // 棋盘基本模板
 char aInitDisplayBoardArray[SIZE][SIZE * CHARSIZE + 1] = {
@@ -39,6 +58,10 @@ void getposition(int x[], int y[]) {
         x[0] = x[0] - 'a' + 'A';
     }
 
+    if (x[0] == EOF) {
+        exit(1);
+    }
+
     while ((c = getchar()) != EOF && c != '\t' && c != '\n' && c != ' ') {
         y[0] *= 10;
         y[0] += c - '0';
@@ -57,8 +80,88 @@ void refresh(void) {
     }
 }
 
-int detect_whitewin() {
-    for (int i = 0; i < SIZE; i++) {
+int in_five(int x) { return (x >= 1 && x <= 4); }
+
+void addConnected(int move, int color /*1 for black, 2 for white*/) {
+    int temp = 2 * move + color - 1;
+
+    pieces[temp].color = color;
+    pieces[temp].x = x[0];
+    pieces[temp].y = y[0];
+    pieces[temp].N = 0;
+    pieces[temp].S = 0;
+    pieces[temp].E = 0;
+    pieces[temp].W = 0;
+    pieces[temp].SW = 0;
+    pieces[temp].SE = 0;
+    pieces[temp].NE = 0;
+    pieces[temp].NW = 0;
+
+    for (int k = 1; aRecordBoard[SIZE - y[0]][x[0] - 'A' + k] == color && x[0] - 'A' + k < SIZE; k++) {
+        pieces[temp].E++;
+    }
+    for (int k = 1; aRecordBoard[SIZE - y[0]][x[0] - 'A' - k] == color && x[0] - 'A' - k >= 0; k++) {
+        pieces[temp].W++;
+    }
+    for (int k = 1; aRecordBoard[SIZE - y[0] - k][x[0] - 'A'] == color && SIZE - y[0] - k >= 0; k++) {
+        pieces[temp].N++;
+    }
+    for (int k = 1; aRecordBoard[SIZE - y[0] + k][x[0] - 'A'] == color && SIZE - y[0] + k < SIZE; k++) {
+        pieces[temp].S++;
+    }
+    for (int k = 1;
+         aRecordBoard[SIZE - y[0] + k][x[0] - 'A' + k] == color && SIZE - y[0] + k < SIZE && x[0] - 'A' + k < SIZE;
+         k++) {
+        pieces[temp].SE++;
+    }
+    for (int k = 1;
+         aRecordBoard[SIZE - y[0] - k][x[0] - 'A' + k] == color && SIZE - y[0] - k >= 0 && x[0] - 'A' + k < SIZE; k++) {
+        pieces[temp].NE++;
+    }
+    for (int k = 1;
+         aRecordBoard[SIZE - y[0] - k][x[0] - 'A' - k] == color && SIZE - y[0] - k >= 0 && x[0] - 'A' - k >= 0; k++) {
+        pieces[temp].NW++;
+    }
+    for (int k = 1;
+         aRecordBoard[SIZE - y[0] + k][x[0] - 'A' - k] == color && SIZE - y[0] + k <= SIZE && x[0] - 'A' - k >= 0;
+         k++) {
+        pieces[temp].SW++;
+    }
+
+    /*for (int i = 0; i < temp; ++i) {
+        if (pieces[i].color == color) {
+            if (pieces[i].x == x[0]) {
+                if (in_five(pieces[i].y - y[0])) {
+                    pieces[temp].N++;
+                } else if (in_five(y[0] - pieces[i].y)) {
+                    pieces[temp].S++;
+                }
+
+            } else if (pieces[i].y == y[0]) {
+                if (in_five(pieces[i].x - x[0])) {
+                    pieces[temp].E++;
+                } else if (in_five(x[0] - pieces[i].x)) {
+                    pieces[temp].W++;
+                }
+            } else if (pieces[i].y - y[0] == pieces[i].x - x[0]) {
+                if (in_five(pieces[i].x - x[0])) {
+                    pieces[temp].NE++;
+                } else if (in_five(x[0] - pieces[i].x)) {
+                    pieces[temp].SW++;
+                }
+            } else if (pieces[i].y + pieces[i].x == y[0] + x[0]) {
+                if (in_five(pieces[i].x - x[0])) {
+                    pieces[temp].SE++;
+                } else if (in_five(x[0] - pieces[i].x)) {
+                    pieces[temp].NW++;
+                }
+            }
+        }
+    }*/
+}
+
+int detectWin(int move, int color) {
+    /*for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             if (aRecordBoard[i][j] == 2) {
                 int east = 0;
@@ -70,7 +173,7 @@ int detect_whitewin() {
                 int SW = 0;
                 int SE = 0;
 
-                for (int k = 1; aRecordBoard[i][j + k] == 2 && j + k < 15; k++) {
+                for (int k = 1; aRecordBoard[i][j + k] == 2 && j + k < SIZE; k++) {
                     east++;
                 }
                 for (int k = 1; aRecordBoard[i][j - k] == 2 && j - k >= 0; k++) {
@@ -79,19 +182,19 @@ int detect_whitewin() {
                 for (int k = 1; aRecordBoard[i - k][j] == 2 && i - k >= 0; k++) {
                     north++;
                 }
-                for (int k = 1; aRecordBoard[i + k][j] == 2 && i + k < 15; k++) {
+                for (int k = 1; aRecordBoard[i + k][j] == 2 && i + k < SIZE; k++) {
                     south++;
                 }
-                for (int k = 1; aRecordBoard[i + k][j + k] == 2 && i + k < 15 && j + k < 15; k++) {
+                for (int k = 1; aRecordBoard[i + k][j + k] == 2 && i + k < SIZE && j + k < SIZE; k++) {
                     SE++;
                 }
-                for (int k = 1; aRecordBoard[i - k][j + k] == 2 && i - k >= 0 && j + k < 15; k++) {
+                for (int k = 1; aRecordBoard[i - k][j + k] == 2 && i - k >= 0 && j + k < SIZE; k++) {
                     NE++;
                 }
                 for (int k = 1; aRecordBoard[i - k][j - k] == 2 && i - k >= 0 && j - k >= 0; k++) {
                     NW++;
                 }
-                for (int k = 1; aRecordBoard[i + k][j - k] == 2 && i + k <= 15 && j - k >= 0; k++) {
+                for (int k = 1; aRecordBoard[i + k][j - k] == 2 && i + k <= SIZE && j - k >= 0; k++) {
                     SW++;
                 }
                 if (east + west + 1 >= 5 || north + south + 1 >= 5 || NW + SE + 1 >= 5 || SW + NE + 1 >= 5) {
@@ -99,12 +202,22 @@ int detect_whitewin() {
                 }
             }
         }
-    }
+    }*/
 
-    return 0;
+    return (pieces[2 * move + color - 1].N + pieces[2 * move + color - 1].S + 1 >= 5) ||
+           (pieces[2 * move + color - 1].E + pieces[2 * move + color - 1].W + 1 >= 5) ||
+           (pieces[2 * move + color - 1].SW + pieces[2 * move + color - 1].NE + 1 >= 5) ||
+           (pieces[2 * move + color - 1].SE + pieces[2 * move + color - 1].NW + 1 >= 5);
 }
 
-int detect_blackwin() {
+void thinkPosition(int x[], int y[]) {
+    while (aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
+        x[0] = rand() % 15 + 'A';
+        y[0] = rand() % 15;
+    }
+}
+
+/*int detectBlackWin() {
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             if (aRecordBoard[i][j] == 1) {
@@ -117,7 +230,7 @@ int detect_blackwin() {
                 int SW = 0;
                 int SE = 0;
 
-                for (int k = 1; aRecordBoard[i][j + k] == 1 && j + k < 15; k++) {
+                for (int k = 1; aRecordBoard[i][j + k] == 1 && j + k < SIZE; k++) {
                     east++;
                 }
                 for (int k = 1; aRecordBoard[i][j - k] == 1 && j - k >= 0; k++) {
@@ -126,19 +239,19 @@ int detect_blackwin() {
                 for (int k = 1; aRecordBoard[i - k][j] == 1 && i - k >= 0; k++) {
                     north++;
                 }
-                for (int k = 1; aRecordBoard[i + k][j] == 1 && i + k < 15; k++) {
+                for (int k = 1; aRecordBoard[i + k][j] == 1 && i + k < SIZE; k++) {
                     south++;
                 }
-                for (int k = 1; aRecordBoard[i + k][j + k] == 1 && i + k < 15 && j + k < 15; k++) {
+                for (int k = 1; aRecordBoard[i + k][j + k] == 1 && i + k < SIZE && j + k < SIZE; k++) {
                     SE++;
                 }
-                for (int k = 1; aRecordBoard[i - k][j + k] == 1 && i - k >= 0 && j + k < 15; k++) {
+                for (int k = 1; aRecordBoard[i - k][j + k] == 1 && i - k >= 0 && j + k < SIZE; k++) {
                     NE++;
                 }
                 for (int k = 1; aRecordBoard[i - k][j - k] == 1 && i - k >= 0 && j - k >= 0; k++) {
                     NW++;
                 }
-                for (int k = 1; aRecordBoard[i + k][j - k] == 1 && i + k <= 15 && j - k >= 0; k++) {
+                for (int k = 1; aRecordBoard[i + k][j - k] == 1 && i + k <= SIZE && j - k >= 0; k++) {
                     SW++;
                 }
                 if (east + west + 1 >= 5 || north + south + 1 >= 5 || NW + SE + 1 >= 5 || SW + NE + 1 >= 5) {
@@ -149,49 +262,165 @@ int detect_blackwin() {
     }
 
     return 0;
-}
+}*/
 
 int main(void) {
     int move = 0;
+
+    int mode, side;
+
     initRecordBorard();
     recordtoDisplayArray();
     displayBoard();
 
-    while (move >= 0) {
-        printf("Black to move: ");
-        getposition(x, y);
-        while ((!(((x[0] >= 'a' && x[0] <= 'z') || (x[0] >= 'A' && x[0] <= 'Z')) && (y[0] >= 1 && y[0] <= 15))) ||
-               aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
-            printf("Not a valid position. Retype: ");
+    printf("Please choose your mode(1 for human vs computer, 2 for human vs human): ");
+
+    scanf("%d", &mode);
+
+    assert(mode == 1 || mode == 2);
+
+    if (mode == 1) {
+        printf("Please choose your side(1 for black, 2 for white): ");
+        scanf("%d", &side);
+
+        assert(side == 1 || side == 2);
+
+        if (side == 1) {
+            while (move >= 0) {
+                printf("Black to move: ");
+                getposition(x, y);
+
+                while ((!(((x[0] >= 'a' && x[0] <= 'z') || (x[0] >= 'A' && x[0] <= 'Z')) &&
+                          (y[0] >= 1 && y[0] <= SIZE))) ||
+                       aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
+                    printf("Not a valid position. Retype: ");
+                    getposition(x, y);
+                }
+
+                addConnected(move, 1);
+
+                aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 3;
+                recordtoDisplayArray();
+                displayBoard();
+
+                refresh();
+
+                if (detectWin(move, 1)) {
+                    printf("Black wins! ");
+                    return 0;
+                }
+
+                printf("Computer thinking...\n");
+                thinkPosition(x, y);
+
+                addConnected(move, 2);
+
+                aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 4;
+                recordtoDisplayArray();
+                displayBoard();
+
+                refresh();
+
+                if (detectWin(move, 2)) {
+                    printf("White wins! ");
+                    return 0;
+                }
+
+                move++;
+            }
+        } else {
+            while (move >= 0) {
+                printf("Computer thinking...\n");
+                thinkPosition(x, y);
+
+                addConnected(move, 1);
+
+                aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 3;
+                recordtoDisplayArray();
+                displayBoard();
+
+                refresh();
+
+                if (detectWin(move, 1)) {
+                    printf("Black wins! ");
+                    return 0;
+                }
+
+                printf("White to move: ");
+                getposition(x, y);
+
+                while ((!(((x[0] >= 'a' && x[0] <= 'z') || (x[0] >= 'A' && x[0] <= 'Z')) &&
+                          (y[0] >= 1 && y[0] <= SIZE))) ||
+                       aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
+                    printf("Not a valid position. Retype: ");
+                    getposition(x, y);
+                }
+
+                addConnected(move, 2);
+
+                aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 4;
+                recordtoDisplayArray();
+                displayBoard();
+
+                refresh();
+
+                if (detectWin(move, 2)) {
+                    printf("White wins! ");
+                    return 0;
+                }
+
+                move++;
+            }
+        }
+    }
+
+    else {
+        while (move >= 0) {
+            printf("Black to move: ");
             getposition(x, y);
-        }
-        aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 3;
-        recordtoDisplayArray();
-        displayBoard();
 
-        refresh();
-        if (detect_blackwin()) {
-            printf("Black wins! ");
-            return 0;
-        }
+            while ((!(((x[0] >= 'a' && x[0] <= 'z') || (x[0] >= 'A' && x[0] <= 'Z')) && (y[0] >= 1 && y[0] <= SIZE))) ||
+                   aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
+                printf("Not a valid position. Retype: ");
+                getposition(x, y);
+            }
 
-        printf("White to move: ");
-        getposition(x, y);
-        while ((!(((x[0] >= 'a' && x[0] <= 'z') || (x[0] >= 'A' && x[0] <= 'Z')) && (y[0] >= 1 && y[0] <= 15))) ||
-               aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
-            printf("Not a valid position. Retype: ");
+            addConnected(move, 1);
+
+            aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 3;
+            recordtoDisplayArray();
+            displayBoard();
+
+            refresh();
+
+            if (detectWin(move, 1)) {
+                printf("Black wins! ");
+                return 0;
+            }
+
+            printf("White to move: ");
             getposition(x, y);
-        }
-        aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 4;
-        recordtoDisplayArray();
-        displayBoard();
 
-        move++;
+            while ((!(((x[0] >= 'a' && x[0] <= 'z') || (x[0] >= 'A' && x[0] <= 'Z')) && (y[0] >= 1 && y[0] <= SIZE))) ||
+                   aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
+                printf("Not a valid position. Retype: ");
+                getposition(x, y);
+            }
 
-        refresh();
-        if (detect_whitewin()) {
-            printf("White wins! ");
-            return 0;
+            addConnected(move, 2);
+
+            aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 4;
+            recordtoDisplayArray();
+            displayBoard();
+
+            refresh();
+
+            if (detectWin(move, 2)) {
+                printf("White wins! ");
+                return 0;
+            }
+
+            move++;
         }
     }
     /*
