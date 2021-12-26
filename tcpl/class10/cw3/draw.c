@@ -13,6 +13,8 @@ void initRecordBorard(void);
 void recordtoDisplayArray(void);
 void displayBoard(void);
 
+char *Color[2] = {"Black", "White"};
+
 struct connected {
     int color;  // 1 for black, 2 for white
 
@@ -150,10 +152,78 @@ int detectWin(int move, int color) {
            (pieces[2 * move + color - 1].SE + pieces[2 * move + color - 1].NW + 1 >= 5);
 }
 
+int isValid(int x[], int y[]) {
+    return x[0] >= 'A' && x[0] <= 'O' && y[0] >= 1 && y[0] <= SIZE && aRecordBoard[SIZE - y[0]][x[0] - 'A'] == 0;
+}
+
 void thinkPosition(int x[], int y[]) {
     while (aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
         x[0] = rand() % 15 + 'A';
         y[0] = rand() % 15;
+    }
+}
+
+void humanVShumanNextMove(int move, int currentSide) {
+    printf(("%s to move: ", Color[currentSide - 1]));
+    getposition(x, y);
+
+    while (!isValid(x, y)) {
+        printf("Not a valid position. Retype: ");
+        getposition(x, y);
+    }
+
+    addConnected(move, currentSide);
+
+    aRecordBoard[SIZE - y[0]][x[0] - 'A'] = currentSide + 2;
+    recordtoDisplayArray();
+    displayBoard();
+
+    refresh();
+
+    if (detectWin(move, currentSide)) {
+        printf("%s wins! ", Color[currentSide - 1]);
+        exit(1);
+    }
+}
+
+void humanVScomputerNextMove(int move, int side, int currentSide) {
+    if (side == currentSide) {
+        printf("%s to move: ", Color[side - 1]);
+        getposition(x, y);
+
+        while (!isValid(x, y)) {
+            printf("Not a valid position. Retype: ");
+            getposition(x, y);
+        }
+
+        addConnected(move, side);
+
+        aRecordBoard[SIZE - y[0]][x[0] - 'A'] = side + 2;
+        recordtoDisplayArray();
+        displayBoard();
+
+        refresh();
+
+        if (detectWin(move, side)) {
+            printf("%s wins! ", Color[side - 1]);
+            exit(1);
+        }
+    } else {
+        printf("Computer thinking...\n");
+        thinkPosition(x, y);
+
+        addConnected(move, currentSide);
+
+        aRecordBoard[SIZE - y[0]][x[0] - 'A'] = currentSide + 2;
+        recordtoDisplayArray();
+        displayBoard();
+
+        refresh();
+
+        if (detectWin(move, currentSide)) {
+            printf("%s wins! ", Color[currentSide]);
+            exit(1);
+        }
     }
 }
 
@@ -173,7 +243,7 @@ int main(void) {
     assert(mode == 1 || mode == 2);
 
     if (mode == 1) {
-        printf("Please choose your side(1 for black, 2 for white): ");
+        /*printf("Please choose your side(1 for black, 2 for white): ");
         scanf("%d", &side);
 
         assert(side == 1 || side == 2);
@@ -183,9 +253,7 @@ int main(void) {
                 printf("Black to move: ");
                 getposition(x, y);
 
-                while ((!(((x[0] >= 'a' && x[0] <= 'z') || (x[0] >= 'A' && x[0] <= 'Z')) &&
-                          (y[0] >= 1 && y[0] <= SIZE))) ||
-                       aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
+                while (!isValid(x, y)) {
                     printf("Not a valid position. Retype: ");
                     getposition(x, y);
                 }
@@ -242,9 +310,7 @@ int main(void) {
                 printf("White to move: ");
                 getposition(x, y);
 
-                while ((!(((x[0] >= 'a' && x[0] <= 'z') || (x[0] >= 'A' && x[0] <= 'Z')) &&
-                          (y[0] >= 1 && y[0] <= SIZE))) ||
-                       aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
+                while (!isValid(x, y)) {
                     printf("Not a valid position. Retype: ");
                     getposition(x, y);
                 }
@@ -264,81 +330,71 @@ int main(void) {
 
                 move++;
             }
+        }*/
+        printf("Please choose your side(1 for black, 2 for white): ");
+        scanf("%d", &side);
+
+        assert(side == 1 || side == 2);
+
+        while (move >= 0) {
+            humanVScomputerNextMove(move, side, 1);
+            humanVScomputerNextMove(move, side, 2);
+
+            move++;
         }
     }
 
     else {
         while (move >= 0) {
-            printf("Black to move: ");
-            getposition(x, y);
+            /*           printf("Black to move: ");
+                       getposition(x, y);
 
-            while ((!(((x[0] >= 'a' && x[0] <= 'z') || (x[0] >= 'A' && x[0] <= 'Z')) && (y[0] >= 1 && y[0] <= SIZE))) ||
-                   aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
-                printf("Not a valid position. Retype: ");
-                getposition(x, y);
-            }
+                       while (!isValid(x, y)) {
+                           printf("Not a valid position. Retype: ");
+                           getposition(x, y);
+                       }
 
-            addConnected(move, 1);
+                       addConnected(move, 1);
 
-            aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 3;
-            recordtoDisplayArray();
-            displayBoard();
+                       aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 3;
+                       recordtoDisplayArray();
+                       displayBoard();
 
-            refresh();
+                       refresh();
 
-            if (detectWin(move, 1)) {
-                printf("Black wins! ");
-                return 0;
-            }
+                       if (detectWin(move, 1)) {
+                           printf("Black wins! ");
+                           return 0;
+                       }
 
-            printf("White to move: ");
-            getposition(x, y);
+                       printf("White to move: ");
+                       getposition(x, y);
 
-            while ((!(((x[0] >= 'a' && x[0] <= 'z') || (x[0] >= 'A' && x[0] <= 'Z')) && (y[0] >= 1 && y[0] <= SIZE))) ||
-                   aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
-                printf("Not a valid position. Retype: ");
-                getposition(x, y);
-            }
+                       while (!isValid(x, y)) {
+                           printf("Not a valid position. Retype: ");
+                           getposition(x, y);
+                       }
 
-            addConnected(move, 2);
+                       addConnected(move, 2);
 
-            aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 4;
-            recordtoDisplayArray();
-            displayBoard();
+                       aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 4;
+                       recordtoDisplayArray();
+                       displayBoard();
 
-            refresh();
+                       refresh();
 
-            if (detectWin(move, 2)) {
-                printf("White wins! ");
-                return 0;
-            }
+                       if (detectWin(move, 2)) {
+                           printf("White wins! ");
+                           return 0;
+                       }
+
+                       move++;*/
+            humanVShumanNextMove(move, 1);
+            humanVShumanNextMove(move, 2);
 
             move++;
         }
     }
-    /*
-    initRecordBorard();
-    aRecordBoard[5][8]=1;
-    aRecordBoard[5][9]=2;
-    recordtoDisplayArray();
-    displayBoard();
-    getchar();
-    aRecordBoard[3][4]=2;
-    recordtoDisplayArray();
-    displayBoard();
-    getchar();
-
-    aRecordBoard[6][1]=1;
-    recordtoDisplayArray();
-    displayBoard();
-    getchar();
-
-    aRecordBoard[9][4]=2;
-    recordtoDisplayArray();
-    displayBoard();
-    getchar();
-    return 0;
-    */
 }
 
 // 初始化棋盘格局
