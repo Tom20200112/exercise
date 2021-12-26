@@ -144,49 +144,6 @@ void addConnected(int move, int color /*1 for black, 2 for white*/) {
 }
 
 int detectWin(int move, int color) {
-    /*for (int i = 0; i < SIZE; i++) {
-        for (int j = 0; j < SIZE; j++) {
-            if (aRecordBoard[i][j] == 2) {
-                int east = 0;
-                int west = 0;
-                int south = 0;
-                int north = 0;
-                int NW = 0;
-                int NE = 0;
-                int SW = 0;
-                int SE = 0;
-
-                for (int k = 1; aRecordBoard[i][j + k] == 2 && j + k < SIZE; k++) {
-                    east++;
-                }
-                for (int k = 1; aRecordBoard[i][j - k] == 2 && j - k >= 0; k++) {
-                    west++;
-                }
-                for (int k = 1; aRecordBoard[i - k][j] == 2 && i - k >= 0; k++) {
-                    north++;
-                }
-                for (int k = 1; aRecordBoard[i + k][j] == 2 && i + k < SIZE; k++) {
-                    south++;
-                }
-                for (int k = 1; aRecordBoard[i + k][j + k] == 2 && i + k < SIZE && j + k < SIZE; k++) {
-                    SE++;
-                }
-                for (int k = 1; aRecordBoard[i - k][j + k] == 2 && i - k >= 0 && j + k < SIZE; k++) {
-                    NE++;
-                }
-                for (int k = 1; aRecordBoard[i - k][j - k] == 2 && i - k >= 0 && j - k >= 0; k++) {
-                    NW++;
-                }
-                for (int k = 1; aRecordBoard[i + k][j - k] == 2 && i + k <= SIZE && j - k >= 0; k++) {
-                    SW++;
-                }
-                if (east + west + 1 >= 5 || north + south + 1 >= 5 || NW + SE + 1 >= 5 || SW + NE + 1 >= 5) {
-                    return 1;
-                }
-            }
-        }
-    }*/
-
     return (pieces[2 * move + color - 1].N + pieces[2 * move + color - 1].S + 1 >= 5) ||
            (pieces[2 * move + color - 1].E + pieces[2 * move + color - 1].W + 1 >= 5) ||
            (pieces[2 * move + color - 1].SW + pieces[2 * move + color - 1].NE + 1 >= 5) ||
