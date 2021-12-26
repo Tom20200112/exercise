@@ -164,7 +164,7 @@ void thinkPosition(int x[], int y[]) {
 }
 
 void humanVShumanNextMove(int move, int currentSide) {
-    printf(("%s to move: ", Color[currentSide - 1]));
+    printf("%s to move: ", Color[currentSide - 1]);
     getposition(x, y);
 
     while (!isValid(x, y)) {
