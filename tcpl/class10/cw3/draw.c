@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,18 +55,33 @@ void getposition(int x[], int y[]) {
     int c;
     y[0] = 0;
 
-    if ((x[0] = getchar()) >= 'a' && x[0] <= 'z') {
-        x[0] = x[0] - 'a' + 'A';
+    // Eat the \n and other spaces
+    while (isspace(c = getchar())) {
     }
 
-    if (x[0] == EOF) {
+    if (c == EOF) {
+        printf("Got EOF, exit.\n");
         exit(1);
     }
 
-    while ((c = getchar()) != EOF && c != '\t' && c != '\n' && c != ' ') {
-        y[0] *= 10;
-        y[0] += c - '0';
+    // printf("%d: c=%d\n", __LINE__, c);
+    if (c >= 'a' && c <= 'z') {
+        x[0] = c - 'a' + 'A';
+    } else {
+        // Invalid, let caller check it
     }
+
+    while (!isspace(c = getchar())) {
+        if (c == EOF) {
+            printf("Got EOF, exit.\n");
+            exit(1);
+        } else if (c >= '0' && c <= '9') {
+            y[0] *= 10;
+            y[0] += c - '0';
+        }
+    }
+
+    // printf("%d: x=%d y=%d\n", __LINE__, x[0], y[0]);
 }
 
 void refresh(void) {
@@ -79,8 +95,6 @@ void refresh(void) {
         }
     }
 }
-
-int in_five(int x) { return (x >= 1 && x <= 4); }
 
 void addConnected(int move, int color /*1 for black, 2 for white*/) {
     int temp = 2 * move + color - 1;
@@ -127,37 +141,6 @@ void addConnected(int move, int color /*1 for black, 2 for white*/) {
          k++) {
         pieces[temp].SW++;
     }
-
-    /*for (int i = 0; i < temp; ++i) {
-        if (pieces[i].color == color) {
-            if (pieces[i].x == x[0]) {
-                if (in_five(pieces[i].y - y[0])) {
-                    pieces[temp].N++;
-                } else if (in_five(y[0] - pieces[i].y)) {
-                    pieces[temp].S++;
-                }
-
-            } else if (pieces[i].y == y[0]) {
-                if (in_five(pieces[i].x - x[0])) {
-                    pieces[temp].E++;
-                } else if (in_five(x[0] - pieces[i].x)) {
-                    pieces[temp].W++;
-                }
-            } else if (pieces[i].y - y[0] == pieces[i].x - x[0]) {
-                if (in_five(pieces[i].x - x[0])) {
-                    pieces[temp].NE++;
-                } else if (in_five(x[0] - pieces[i].x)) {
-                    pieces[temp].SW++;
-                }
-            } else if (pieces[i].y + pieces[i].x == y[0] + x[0]) {
-                if (in_five(pieces[i].x - x[0])) {
-                    pieces[temp].SE++;
-                } else if (in_five(x[0] - pieces[i].x)) {
-                    pieces[temp].NW++;
-                }
-            }
-        }
-    }*/
 }
 
 int detectWin(int move, int color) {
@@ -216,53 +199,6 @@ void thinkPosition(int x[], int y[]) {
         y[0] = rand() % 15;
     }
 }
-
-/*int detectBlackWin() {
-    for (int i = 0; i < SIZE; i++) {
-        for (int j = 0; j < SIZE; j++) {
-            if (aRecordBoard[i][j] == 1) {
-                int east = 0;
-                int west = 0;
-                int south = 0;
-                int north = 0;
-                int NW = 0;
-                int NE = 0;
-                int SW = 0;
-                int SE = 0;
-
-                for (int k = 1; aRecordBoard[i][j + k] == 1 && j + k < SIZE; k++) {
-                    east++;
-                }
-                for (int k = 1; aRecordBoard[i][j - k] == 1 && j - k >= 0; k++) {
-                    west++;
-                }
-                for (int k = 1; aRecordBoard[i - k][j] == 1 && i - k >= 0; k++) {
-                    north++;
-                }
-                for (int k = 1; aRecordBoard[i + k][j] == 1 && i + k < SIZE; k++) {
-                    south++;
-                }
-                for (int k = 1; aRecordBoard[i + k][j + k] == 1 && i + k < SIZE && j + k < SIZE; k++) {
-                    SE++;
-                }
-                for (int k = 1; aRecordBoard[i - k][j + k] == 1 && i - k >= 0 && j + k < SIZE; k++) {
-                    NE++;
-                }
-                for (int k = 1; aRecordBoard[i - k][j - k] == 1 && i - k >= 0 && j - k >= 0; k++) {
-                    NW++;
-                }
-                for (int k = 1; aRecordBoard[i + k][j - k] == 1 && i + k <= SIZE && j - k >= 0; k++) {
-                    SW++;
-                }
-                if (east + west + 1 >= 5 || north + south + 1 >= 5 || NW + SE + 1 >= 5 || SW + NE + 1 >= 5) {
-                    return 1;
-                }
-            }
-        }
-    }
-
-    return 0;
-}*/
 
 int main(void) {
     int move = 0;

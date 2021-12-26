@@ -24,18 +24,33 @@ void getposition(int x[], int y[]) {
     int c;
     y[0] = 0;
 
-    if ((x[0] = getchar()) >= 'a' && x[0] <= 'z') {
-        x[0] = x[0] - 'a' + 'A';
+    // Eat the \n and other spaces
+    while (isspace(c = getchar())) {
     }
 
-    if (x[0] == EOF) {
+    if (c == EOF) {
+        printf("Got EOF, exit.\n");
         exit(1);
     }
 
-    while ((c = getchar()) != EOF && c != '\t' && c != '\n' && c != ' ') {
-        y[0] *= 10;
-        y[0] += c - '0';
+    // printf("%d: c=%d\n", __LINE__, c);
+    if (c >= 'a' && c <= 'z') {
+        x[0] = c - 'a' + 'A';
+    } else {
+        // Invalid, let caller check it
     }
+
+    while (!isspace(c = getchar())) {
+        if (c == EOF) {
+            printf("Got EOF, exit.\n");
+            exit(1);
+        } else if (c >= '0' && c <= '9') {
+            y[0] *= 10;
+            y[0] += c - '0';
+        }
+    }
+
+    // printf("%d: x=%d y=%d\n", __LINE__, x[0], y[0]);
 }
 
 void refresh(void) {
