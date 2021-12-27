@@ -11,7 +11,7 @@ int y[1];
 int aRecordBoard[SIZE][SIZE];
 
 // 初始化棋盘格局
-void initRecordBorard(void) {
+void initRecordBoard(void) {
     // 通过双重循环，将aRecordBoard清0
     for (int i = 0; i < SIZE; ++i) {
         for (int j = 0; j < SIZE; ++j) {
@@ -20,7 +20,7 @@ void initRecordBorard(void) {
     }
 }
 
-void getposition(int x[], int y[]) {
+void getPosition(int x[], int y[]) {
     int c;
     y[0] = 0;
 
@@ -68,16 +68,16 @@ void refresh(void) {
 int main(void) {
     int move = 0;
 
-    initRecordBorard();
+    initRecordBoard();
 
     while (move >= 0) {
         printf("Black to move: ");
-        getposition(x, y);
+        getPosition(x, y);
 
         while ((!(((x[0] >= 'a' && x[0] <= 'z') || (x[0] >= 'A' && x[0] <= 'Z')) && (y[0] >= 1 && y[0] <= SIZE))) ||
                aRecordBoard[SIZE - y[0]][x[0] - 'A'] != 0) {
             printf("Not a valid position. Retype: ");
-            getposition(x, y);
+            getPosition(x, y);
         }
 
         aRecordBoard[SIZE - y[0]][x[0] - 'A'] = 3;

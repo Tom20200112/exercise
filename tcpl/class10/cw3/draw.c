@@ -9,8 +9,10 @@
 #define SIZE 15
 #define CHARSIZE 3  // 2 for GBK, 3 for UTF-8
 
-void initRecordBorard(void);
-void recordtoDisplayArray(void);
+int move = 0;
+
+void initRecordBoard(void);
+void recordToDisplayArray(void);
 void displayBoard(void);
 
 char *Color[2] = {"Black", "White"};
@@ -53,7 +55,7 @@ int y[1];
 //此数组用于记录棋盘格局
 int aRecordBoard[SIZE][SIZE];
 
-void getposition(int x[], int y[]) {
+void getPosition(int x[], int y[]) {
     int c;
     y[0] = 0;
 
@@ -71,6 +73,7 @@ void getposition(int x[], int y[]) {
         x[0] = c - 'a' + 'A';
     } else {
         // Invalid, let caller check it
+        x[0] = c;
     }
 
     while (!isspace(c = getchar())) {
@@ -98,7 +101,7 @@ void refresh(void) {
     }
 }
 
-void addConnected(int move, int color /*1 for black, 2 for white*/) {
+void addConnected(int color /*1 for black, 2 for white*/) {
     int temp = 2 * move + color - 1;
 
     pieces[temp].color = color;
@@ -145,7 +148,7 @@ void addConnected(int move, int color /*1 for black, 2 for white*/) {
     }
 }
 
-int detectWin(int move, int color) {
+int detectWin(int color) {
     return (pieces[2 * move + color - 1].N + pieces[2 * move + color - 1].S + 1 >= 5) ||
            (pieces[2 * move + color - 1].E + pieces[2 * move + color - 1].W + 1 >= 5) ||
            (pieces[2 * move + color - 1].SW + pieces[2 * move + color - 1].NE + 1 >= 5) ||
@@ -153,7 +156,8 @@ int detectWin(int move, int color) {
 }
 
 int isValid(int x[], int y[]) {
-    return x[0] >= 'A' && x[0] <= 'O' && y[0] >= 1 && y[0] <= SIZE && aRecordBoard[SIZE - y[0]][x[0] - 'A'] == 0;
+    return ((x[0] >= 'A' && x[0] <= 'O') || x[0] == 'R') && y[0] >= 1 && y[0] <= SIZE &&
+           aRecordBoard[SIZE - y[0]][x[0] - 'A'] == 0;
 }
 
 void thinkPosition(int x[], int y[]) {
@@ -163,48 +167,75 @@ void thinkPosition(int x[], int y[]) {
     }
 }
 
-void humanVShumanNextMove(int move, int currentSide) {
+void humanVShumanNextMove(int currentSide);
+
+void removeConnected(int index) {
+    aRecordBoard[SIZE - pieces[index].y][pieces[index].x - 'A'] = 0;
+    recordToDisplayArray();
+    displayBoard();
+}
+
+void takeBackMove(int currentSide) {
+    removeConnected(2 * move + currentSide - 2);
+    removeConnected(2 * move + currentSide - 3);
+
+    move--;
+
+    printf("Please redo %s's last move: \n", Color[currentSide - 1]);
+
+    humanVShumanNextMove(currentSide);
+}
+
+void humanVShumanNextMove(int currentSide) {
     printf("%s to move: ", Color[currentSide - 1]);
-    getposition(x, y);
+    getPosition(x, y);
 
     while (!isValid(x, y)) {
         printf("Not a valid position. Retype: ");
-        getposition(x, y);
+        getPosition(x, y);
     }
 
-    addConnected(move, currentSide);
+    if (x[0] == 'R' /*悔棋*/) {
+        takeBackMove(currentSide);
+    } else {
+        addConnected(currentSide);
 
-    aRecordBoard[SIZE - y[0]][x[0] - 'A'] = currentSide + 2;
-    recordtoDisplayArray();
-    displayBoard();
+        aRecordBoard[SIZE - y[0]][x[0] - 'A'] = currentSide + 2;
+        recordToDisplayArray();
+        displayBoard();
 
-    refresh();
+        refresh();
+    }
 
-    if (detectWin(move, currentSide)) {
+    if (detectWin(currentSide)) {
         printf("%s wins! ", Color[currentSide - 1]);
         exit(1);
     }
 }
 
-void humanVScomputerNextMove(int move, int side, int currentSide) {
+void humanVScomputerNextMove(int side, int currentSide) {
     if (side == currentSide) {
         printf("%s to move: ", Color[side - 1]);
-        getposition(x, y);
+        getPosition(x, y);
 
         while (!isValid(x, y)) {
             printf("Not a valid position. Retype: ");
-            getposition(x, y);
+            getPosition(x, y);
         }
 
-        addConnected(move, side);
+        if (x[0] == 'R' /*悔棋*/) {
+            takeBackMove(currentSide);
+        } else {
+            addConnected(side);
 
-        aRecordBoard[SIZE - y[0]][x[0] - 'A'] = side + 2;
-        recordtoDisplayArray();
-        displayBoard();
+            aRecordBoard[SIZE - y[0]][x[0] - 'A'] = side + 2;
+            recordToDisplayArray();
+            displayBoard();
 
-        refresh();
+            refresh();
+        }
 
-        if (detectWin(move, side)) {
+        if (detectWin(side)) {
             printf("%s wins! ", Color[side - 1]);
             exit(1);
         }
@@ -212,15 +243,15 @@ void humanVScomputerNextMove(int move, int side, int currentSide) {
         printf("Computer thinking...\n");
         thinkPosition(x, y);
 
-        addConnected(move, currentSide);
+        addConnected(currentSide);
 
         aRecordBoard[SIZE - y[0]][x[0] - 'A'] = currentSide + 2;
-        recordtoDisplayArray();
+        recordToDisplayArray();
         displayBoard();
 
         refresh();
 
-        if (detectWin(move, currentSide)) {
+        if (detectWin(currentSide)) {
             printf("%s wins! ", Color[currentSide]);
             exit(1);
         }
@@ -228,12 +259,10 @@ void humanVScomputerNextMove(int move, int side, int currentSide) {
 }
 
 int main(void) {
-    int move = 0;
-
     int mode, side;
 
-    initRecordBorard();
-    recordtoDisplayArray();
+    initRecordBoard();
+    recordToDisplayArray();
     displayBoard();
 
     printf("Please choose your mode(1 for human vs computer, 2 for human vs human): ");
@@ -337,8 +366,8 @@ int main(void) {
         assert(side == 1 || side == 2);
 
         while (move >= 0) {
-            humanVScomputerNextMove(move, side, 1);
-            humanVScomputerNextMove(move, side, 2);
+            humanVScomputerNextMove(side, 1);
+            humanVScomputerNextMove(side, 2);
 
             move++;
         }
@@ -389,8 +418,8 @@ int main(void) {
                        }
 
                        move++;*/
-            humanVShumanNextMove(move, 1);
-            humanVShumanNextMove(move, 2);
+            humanVShumanNextMove(1);
+            humanVShumanNextMove(2);
 
             move++;
         }
@@ -398,7 +427,7 @@ int main(void) {
 }
 
 // 初始化棋盘格局
-void initRecordBorard(void) {
+void initRecordBoard(void) {
     // 通过双重循环，将aRecordBoard清0
     for (int i = 0; i < SIZE; ++i) {
         for (int j = 0; j < SIZE; ++j) {
@@ -408,7 +437,7 @@ void initRecordBorard(void) {
 }
 
 // 将aRecordBoard中记录的棋子位置，转化到aDisplayBoardArray中
-void recordtoDisplayArray(void) {
+void recordToDisplayArray(void) {
     // 第一步：将aInitDisplayBoardArray中记录的空棋盘，复制到aDisplayBoardArray中
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE * CHARSIZE + 1; j++) {
