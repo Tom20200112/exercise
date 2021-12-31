@@ -35,6 +35,11 @@ struct connected {
 
 struct connected pieces[SIZE * SIZE];
 
+struct SingleInfo {
+    int LinkNum;
+    int oppNum;
+};
+
 // 棋盘基本模板
 char aInitDisplayBoardArray[SIZE][SIZE * CHARSIZE + 1] = {
     "┏┯┯┯┯┯┯┯┯┯┯┯┯┯┓", "┠┼┼┼┼┼┼┼┼┼┼┼┼┼┨", "┠┼┼┼┼┼┼┼┼┼┼┼┼┼┨", "┠┼┼┼┼┼┼┼┼┼┼┼┼┼┨", "┠┼┼┼┼┼┼┼┼┼┼┼┼┼┨",
