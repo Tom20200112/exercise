@@ -31,6 +31,22 @@ typedef struct Connected {
     int SW;
 } Connected;
 
+typedef struct Sorter {
+    int i;
+    int j;
+    int score;
+} Sorter;
+
+typedef struct SingleInfo {
+    int linkNum;  // 连珠数量
+    int oppNum;   // 两端对手棋子数量
+} SingleInfo;
+
+typedef struct SingleScore {
+    SingleInfo info[4];  // 记录四个方向连珠信息
+    int score;           // 当前点评分
+} SingleScore;
+
 // Prototypes
 void logMove(int currentSide, int x, int y);
 void getPosition(int *x, int *y);
@@ -38,6 +54,8 @@ void refresh(void);
 void addConnected(int color, int x, int y);
 int detectWin(int color);
 int isValid(int x, int y);
+int cmpSorter(const void *a, const void *b);
+void chooseMove(int *x, int *y, int side);
 void thinkPosition(int *x, int *y, int side);
 void removeConnected(int index);
 bool takeBackMove(int currentSide);
@@ -59,25 +77,7 @@ enum Mode { HUMAN2COMPUTER = 1, HUMAN2HUMAN = 2 };
 
 Connected Pieces[SIZE * SIZE];
 
-struct singleInfo {
-    int linkNum;  //连珠数量
-    int oppNum;   //两端对手棋子数量
-};
-
-struct singleScore {
-    struct singleInfo info[4];  //记录四个方向连珠信息
-
-    int score;  //当前点评分
-};
-
-struct point {
-    int i;
-    int j;
-};
-
-struct point highestFive[CHOICE] = {{7, 7}, {7, 6}, {7, 8}, {6, 7}, {8, 7}};
-
-struct singleScore myBoardScore[SIZE][SIZE][2];
+SingleScore MyBoardScore[SIZE][SIZE][2];
 
 // 棋盘基本模板
 // clang-format off
@@ -139,6 +139,7 @@ void getPosition(int *x, int *y) {
 
     // Eat the \n and other spaces
     while (isspace(c = getchar())) {
+        ;
     }
 
     if (c == EOF) {
@@ -232,97 +233,159 @@ int isValid(int x, int y) {
 
 void evalueScore(int i, int j, int side) {
     for (int m = 0; m < 4; ++m) {
-        myBoardScore[i][j][side - 1].info[m].linkNum = 0;
-        myBoardScore[i][j][side - 1].info[m].oppNum = 0;
+        MyBoardScore[i][j][side - 1].info[m].linkNum = 0;
+        MyBoardScore[i][j][side - 1].info[m].oppNum = 0;
     }
 
-    myBoardScore[i][j][side - 1].score = 0;
+    MyBoardScore[i][j][side - 1].score = 0;
 
     if (RecordBoard[i][j] != 0) {
-        myBoardScore[i][j][side - 1].score = -1;
+        MyBoardScore[i][j][side - 1].score = -1;
     } else {
         int m = 1;
         for (; j + m < SIZE && (RecordBoard[i][j + m] == side || RecordBoard[i][j + m] == side + 2); m++) {
-            myBoardScore[i][j][side - 1].info[0].linkNum++;
+            MyBoardScore[i][j][side - 1].info[0].linkNum++;
         }
 
         if (j + m < SIZE && RecordBoard[i][j + m] != 0) {
-            myBoardScore[i][j][side - 1].info[0].oppNum++;
+            MyBoardScore[i][j][side - 1].info[0].oppNum++;
         }
 
         for (m = 1; j - m >= 0 && (RecordBoard[i][j - m] == side || RecordBoard[i][j - m] == side + 2); m++) {
-            myBoardScore[i][j][side - 1].info[0].linkNum++;
+            MyBoardScore[i][j][side - 1].info[0].linkNum++;
         }
 
         if (j - m >= 0 && RecordBoard[i][j - m] != 0) {
-            myBoardScore[i][j][side - 1].info[0].oppNum++;
+            MyBoardScore[i][j][side - 1].info[0].oppNum++;
         }
 
         for (m = 1; i + m < SIZE && (RecordBoard[i + m][j] == side || RecordBoard[i + m][j] == side + 2); m++) {
-            myBoardScore[i][j][side - 1].info[1].linkNum++;
+            MyBoardScore[i][j][side - 1].info[1].linkNum++;
         }
 
         if (i + m < SIZE && RecordBoard[i + m][j] != 0) {
-            myBoardScore[i][j][side - 1].info[1].oppNum++;
+            MyBoardScore[i][j][side - 1].info[1].oppNum++;
         }
 
         for (m = 1; i - m >= 0 && (RecordBoard[i - m][j] == side || RecordBoard[i - m][j] == side + 2); m++) {
-            myBoardScore[i][j][side - 1].info[1].linkNum++;
+            MyBoardScore[i][j][side - 1].info[1].linkNum++;
         }
 
         if (i - m >= 0 && RecordBoard[i - m][j] != 0) {
-            myBoardScore[i][j][side - 1].info[1].oppNum++;
+            MyBoardScore[i][j][side - 1].info[1].oppNum++;
         }
 
         for (m = 1; i + m < SIZE && j + m < SIZE &&
                     (RecordBoard[i + m][j + m] == side || RecordBoard[i + m][j + m] == side + 2);
              m++) {
-            myBoardScore[i][j][side - 1].info[2].linkNum++;
+            MyBoardScore[i][j][side - 1].info[2].linkNum++;
         }
 
         if (i + m < SIZE && j + m < SIZE && RecordBoard[i + m][j + m] != 0) {
-            myBoardScore[i][j][side - 1].info[2].oppNum++;
+            MyBoardScore[i][j][side - 1].info[2].oppNum++;
         }
 
         for (m = 1;
              i - m >= 0 && j - m >= 0 && (RecordBoard[i - m][j - m] == side || RecordBoard[i - m][j - m] == side + 2);
              m++) {
-            myBoardScore[i][j][side - 1].info[2].linkNum++;
+            MyBoardScore[i][j][side - 1].info[2].linkNum++;
         }
 
         if (i - m >= 0 && j - m >= 0 && RecordBoard[i - m][j - m] != 0) {
-            myBoardScore[i][j][side - 1].info[2].oppNum++;
+            MyBoardScore[i][j][side - 1].info[2].oppNum++;
         }
 
         for (m = 1;
              i + m < SIZE && j - m >= 0 && (RecordBoard[i + m][j - m] == side || RecordBoard[i + m][j - m] == side + 2);
              m++) {
-            myBoardScore[i][j][side - 1].info[3].linkNum++;
+            MyBoardScore[i][j][side - 1].info[3].linkNum++;
         }
 
         if (i + m < SIZE && j - m >= 0 && RecordBoard[i + m][j - m] != 0) {
-            myBoardScore[i][j][side - 1].info[3].oppNum++;
+            MyBoardScore[i][j][side - 1].info[3].oppNum++;
         }
 
         for (m = 1;
              i - m >= 0 && j + m < SIZE && (RecordBoard[i - m][j + m] == side || RecordBoard[i - m][j + m] == side + 2);
              m++) {
-            myBoardScore[i][j][side - 1].info[3].linkNum++;
+            MyBoardScore[i][j][side - 1].info[3].linkNum++;
         }
 
         if (i - m >= 0 && j + m < SIZE && RecordBoard[i - m][j + m] != 0) {
-            myBoardScore[i][j][side - 1].info[3].oppNum++;
+            MyBoardScore[i][j][side - 1].info[3].oppNum++;
         }
 
         for (int n = 0; n < 4; n++) {
-            if (myBoardScore[i][j][side - 1].info[n].linkNum >= 4) {
-                myBoardScore[i][j][side - 1].score += 200;
+            if (MyBoardScore[i][j][side - 1].info[n].linkNum >= 4) {
+                MyBoardScore[i][j][side - 1].score += 200;
             } else {
-                myBoardScore[i][j][side - 1].score += (myBoardScore[i][j][side - 1].info[n].linkNum) *
-                                                      (4 - 1 * (myBoardScore[i][j][side - 1].info[n].oppNum));
+                MyBoardScore[i][j][side - 1].score += (MyBoardScore[i][j][side - 1].info[n].linkNum) *
+                                                      (4 - 2 * (MyBoardScore[i][j][side - 1].info[n].oppNum));
             }
         }
     }
+}
+
+// Sort descending
+int cmpSorter(const void *a, const void *b) {
+    int va = ((Sorter *)a)->score;
+    int vb = ((Sorter *)b)->score;
+    if (va < vb) {
+        return 1;
+    } else if (va > vb) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+void chooseMove(int *x, int *y, int side) {
+    Sorter sorter[SIZE * SIZE];
+    int pos = 0;
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (MyBoardScore[i][j][side - 1].score >= 0) {
+                sorter[pos].i = i;
+                sorter[pos].j = j;
+                sorter[pos].score = 2 * MyBoardScore[i][j][side - 1].score + 3 * MyBoardScore[i][j][2 - side].score;
+                pos++;
+            }
+        }
+    }
+
+    // At least one valid point is found
+    if (pos <= 0) {
+        printf("No valid point found!\n");
+        exit(1);
+    }
+
+    qsort(sorter, pos, sizeof(Sorter), cmpSorter);
+
+    // Find the top N elements with the same scores
+    int count = 1;
+    for (int i = 1; i < pos; i++) {
+        if (sorter[i].score == sorter[0].score) {
+            count++;
+        } else {
+            break;
+        }
+    }
+
+    assert(count >= 1);
+
+    printf("Optional points: \n");
+
+    for (int i = 0; i < count; ++i) {
+        putchar(sorter[i].j + 'A');
+        printf("%d\n", SIZE - sorter[i].i);
+    }
+
+    int random = rand() % count;
+
+    printf("%d\n", random);
+
+    *x = sorter[random].j + 'A';
+    *y = SIZE - sorter[random].i;
 }
 
 void thinkPosition(int *x, int *y, int side) {
@@ -333,30 +396,15 @@ void thinkPosition(int *x, int *y, int side) {
         }
     }
 
+    // Print scores
     for (int i = 0; i < SIZE; ++i) {
         for (int j = 0; j < SIZE; j++) {
-            for (int k = 0; k < CHOICE; k++) {
-                if (2 * myBoardScore[i][j][side - 1].score + 3 * myBoardScore[i][j][2 - side].score >
-                    2 * myBoardScore[highestFive[k].i][highestFive[k].j][side - 1].score +
-                        3 * myBoardScore[highestFive[k].i][highestFive[k].j][2 - side].score) {
-                    highestFive[k].i = i;
-                    highestFive[k].j = j;
-                }
-            }
+            printf("%d ", MyBoardScore[i][j][side - 1].score);
         }
+        printf("\n");
     }
 
-    int random;
-
-    do {
-        random = rand() % CHOICE;
-        *x = highestFive[random].j + 'A';
-        *y = SIZE - highestFive[random].i;
-    } while (myBoardScore[highestFive[random].i][highestFive[random].j][side - 1].score < 0);
-    /*do {
-        *x = rand() % 15 + 'A';
-        *y = rand() % 15;
-    } while (RecordBoard[SIZE - *y][*x - 'A'] != 0);*/
+    chooseMove(x, y, side);
 }
 
 void removeConnected(int index) {
@@ -466,6 +514,8 @@ bool human2ComputerNextMove(int side, int currentSide) {
 
         putchar(x);
         printf("%d\n", y);
+
+        refresh();
 
         refresh();
 
@@ -590,7 +640,8 @@ void recordToDisplayArray(void) {
 // 显示棋盘格局
 void displayBoard(void) {
     // 第一步：清屏
-    system("clear");  // 清屏
+    // 注释掉下面这个 clear 可以方便调试
+    // system("clear");  // 清屏
 
     printf("Work of 张治成\n");
 
