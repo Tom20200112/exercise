@@ -47,6 +47,11 @@ typedef struct SingleScore {
     int score;           // 当前点评分
 } SingleScore;
 
+typedef struct Point {
+    int i;
+    int j;
+} Point;
+
 // Prototypes
 void logMove(int currentSide, int x, int y);
 void getPosition(int *x, int *y);
@@ -68,6 +73,18 @@ void displayBoard(void);
 
 // Variables
 int Move = 0;
+
+bool Chengwu[2] = {false, false};
+
+bool Huosi[2] = {false, false};
+
+bool Chongsi[2] = {false, false};
+
+Point ChengwuPoint[2] = {{-1, -1}, {-1, -1}};
+
+Point HuosiPoint[2][2] = {{{-1, -1}, {-1, -1}}, {{-1, -1}, {-1, -1}}};
+
+Point ChongsiPoint[2][2] = {{{-1, -1}, {-1, -1}}, {{-1, -1}, {-1, -1}}};
 
 char *Color[2] = {"Black", "White"};
 // 注意，枚举值从 1 开始，数组 Color 下标从 0 开始
@@ -247,7 +264,7 @@ void evalueScore(int i, int j, int side) {
             MyBoardScore[i][j][side - 1].info[0].linkNum++;
         }
 
-        if (j + m < SIZE && RecordBoard[i][j + m] != 0) {
+        if ((j + m < SIZE && RecordBoard[i][j + m] != 0) || j + m >= SIZE) {
             MyBoardScore[i][j][side - 1].info[0].oppNum++;
         }
 
@@ -255,7 +272,7 @@ void evalueScore(int i, int j, int side) {
             MyBoardScore[i][j][side - 1].info[0].linkNum++;
         }
 
-        if (j - m >= 0 && RecordBoard[i][j - m] != 0) {
+        if ((j - m >= 0 && RecordBoard[i][j - m] != 0) || j - m < 0) {
             MyBoardScore[i][j][side - 1].info[0].oppNum++;
         }
 
@@ -263,7 +280,7 @@ void evalueScore(int i, int j, int side) {
             MyBoardScore[i][j][side - 1].info[1].linkNum++;
         }
 
-        if (i + m < SIZE && RecordBoard[i + m][j] != 0) {
+        if ((i + m < SIZE && RecordBoard[i + m][j] != 0) || i + m >= SIZE) {
             MyBoardScore[i][j][side - 1].info[1].oppNum++;
         }
 
@@ -271,7 +288,7 @@ void evalueScore(int i, int j, int side) {
             MyBoardScore[i][j][side - 1].info[1].linkNum++;
         }
 
-        if (i - m >= 0 && RecordBoard[i - m][j] != 0) {
+        if ((i - m >= 0 && RecordBoard[i - m][j] != 0) || i - m < 0) {
             MyBoardScore[i][j][side - 1].info[1].oppNum++;
         }
 
@@ -281,7 +298,7 @@ void evalueScore(int i, int j, int side) {
             MyBoardScore[i][j][side - 1].info[2].linkNum++;
         }
 
-        if (i + m < SIZE && j + m < SIZE && RecordBoard[i + m][j + m] != 0) {
+        if ((i + m < SIZE && j + m < SIZE && RecordBoard[i + m][j + m] != 0) || i + m >= SIZE || j + m >= SIZE) {
             MyBoardScore[i][j][side - 1].info[2].oppNum++;
         }
 
@@ -291,7 +308,7 @@ void evalueScore(int i, int j, int side) {
             MyBoardScore[i][j][side - 1].info[2].linkNum++;
         }
 
-        if (i - m >= 0 && j - m >= 0 && RecordBoard[i - m][j - m] != 0) {
+        if ((i - m >= 0 && j - m >= 0 && RecordBoard[i - m][j - m] != 0) || i - m < 0 || j - m < 0) {
             MyBoardScore[i][j][side - 1].info[2].oppNum++;
         }
 
@@ -301,7 +318,7 @@ void evalueScore(int i, int j, int side) {
             MyBoardScore[i][j][side - 1].info[3].linkNum++;
         }
 
-        if (i + m < SIZE && j - m >= 0 && RecordBoard[i + m][j - m] != 0) {
+        if ((i + m < SIZE && j - m >= 0 && RecordBoard[i + m][j - m] != 0) || i + m >= SIZE || j - m < 0) {
             MyBoardScore[i][j][side - 1].info[3].oppNum++;
         }
 
@@ -311,7 +328,7 @@ void evalueScore(int i, int j, int side) {
             MyBoardScore[i][j][side - 1].info[3].linkNum++;
         }
 
-        if (i - m >= 0 && j + m < SIZE && RecordBoard[i - m][j + m] != 0) {
+        if ((i - m >= 0 && j + m < SIZE && RecordBoard[i - m][j + m] != 0) || i - m < 0 || j + m >= SIZE) {
             MyBoardScore[i][j][side - 1].info[3].oppNum++;
         }
 
@@ -388,6 +405,108 @@ void chooseMove(int *x, int *y, int side) {
     *y = SIZE - sorter[random].i;
 }
 
+void initialChengwu() {
+    Chengwu[0] = false;
+    Chengwu[1] = false;
+
+    for (int i = 0; i < 2; i++) {
+        ChengwuPoint[i].i = -1;
+        ChengwuPoint[i].j = -1;
+    }
+}
+
+void initialHuosi() {
+    Huosi[0] = false;
+    Huosi[1] = false;
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            HuosiPoint[i][j].i = -1;
+            HuosiPoint[i][j].j = -1;
+        }
+    }
+}
+
+void initialChongsi() {
+    Chongsi[0] = false;
+    Chongsi[1] = false;
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            ChongsiPoint[i][j].i = -1;
+            ChongsiPoint[i][j].j = -1;
+        }
+    }
+}
+
+void checkChengwu(int side) {
+    initialChengwu();
+
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            for (int k = 0; k < 4; k++) {
+                if (MyBoardScore[i][j][side - 1].info[k].linkNum == 4) {
+                    ChengwuPoint[side - 1].i = i;
+                    ChengwuPoint[side - 1].j = j;
+
+                    Chengwu[side - 1] = true;
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void checkHuosi(int side) {
+    int l = 0;
+
+    initialHuosi();
+
+    for (int i = 1; i < SIZE - 1; i++) {
+        for (int j = 1; j < SIZE - 1; j++) {
+            for (int k = 0; k < 4; k++) {
+                if (MyBoardScore[i][j][side - 1].info[k].linkNum == 3 &&
+                    MyBoardScore[i][j][side - 1].info[k].oppNum == 0) {
+                    if (l < 2) {
+                        HuosiPoint[side - 1][l].i = i;
+                        HuosiPoint[side - 1][l].j = j;
+
+                        Huosi[side - 1] = true;
+                        l++;
+                    } else {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void checkChongsi(int side) {
+    int l = 0;
+
+    initialChongsi();
+
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            for (int k = 0; k < 4; k++) {
+                if (MyBoardScore[i][j][side - 1].info[k].linkNum == 3 &&
+                    MyBoardScore[i][j][side - 1].info[k].oppNum == 1) {
+                    if (l < 2) {
+                        ChongsiPoint[side - 1][l].i = i;
+                        ChongsiPoint[side - 1][l].j = j;
+
+                        Chongsi[side - 1] = true;
+                        l++;
+                    } else {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
 void thinkPosition(int *x, int *y, int side) {
     for (int i = 0; i < SIZE; ++i) {
         for (int j = 0; j < SIZE; ++j) {
@@ -404,7 +523,86 @@ void thinkPosition(int *x, int *y, int side) {
         printf("\n");
     }
 
-    chooseMove(x, y, side);
+    checkChengwu(side);
+    checkChengwu(3 - side);
+
+    checkHuosi(side);
+    checkHuosi(3 - side);
+
+    checkChongsi(side);
+    checkChongsi(3 - side);
+
+    printf("ifChengwu: %d\n", Chengwu[side - 1]);
+
+    printf("ifHuosi: %d\n", Huosi[side - 1]);
+
+    printf("ifChongsi: %d\n", Chongsi[side - 1]);
+
+    if (Chengwu[side - 1]) {
+        *x = ChengwuPoint[side - 1].j + 'A';
+        *y = SIZE - ChengwuPoint[side - 1].i;
+
+        printf("Chengwu:\n");
+        putchar(*x);
+        printf("%d\n", *y);
+    } else if (Chengwu[2 - side]) {
+        *x = ChengwuPoint[2 - side].j + 'A';
+        *y = SIZE - ChengwuPoint[2 - side].i;
+
+        printf("oppChengwu:\n");
+        putchar(*x);
+        printf("%d\n", *y);
+    } else if (Huosi[side - 1]) {
+        int random;
+
+        do {
+            random = rand() % 2;
+            *x = HuosiPoint[side - 1][random].j + 'A';
+            *y = SIZE - HuosiPoint[side - 1][random].i;
+        } while (HuosiPoint[side - 1][random].j < 0);
+
+        printf("Huosi:\n");
+        putchar(*x);
+        printf("%d\n", *y);
+    } else if (Huosi[2 - side]) {
+        int random;
+
+        do {
+            random = rand() % 2;
+            *x = HuosiPoint[2 - side][random].j + 'A';
+            *y = SIZE - HuosiPoint[2 - side][random].i;
+        } while (HuosiPoint[2 - side][random].j < 0);
+
+        printf("oppHuosi:\n");
+        putchar(*x);
+        printf("%d\n", *y);
+    } else if (Chongsi[side - 1]) {
+        int random;
+
+        do {
+            random = rand() % 2;
+            *x = ChongsiPoint[side - 1][random].j + 'A';
+            *y = SIZE - ChongsiPoint[side - 1][random].i;
+        } while (ChongsiPoint[side - 1][random].j < 0);
+
+        printf("Chongsi:\n");
+        putchar(*x);
+        printf("%d\n", *y);
+    } else if (Chongsi[2 - side]) {
+        int random;
+
+        do {
+            random = rand() % 2;
+            *x = ChongsiPoint[2 - side][random].j + 'A';
+            *y = SIZE - ChongsiPoint[2 - side][random].i;
+        } while (ChongsiPoint[2 - side][random].j < 0);
+
+        printf("oppChongsi:\n");
+        putchar(*x);
+        printf("%d\n", *y);
+    } else {
+        chooseMove(x, y, side);
+    }
 }
 
 void removeConnected(int index) {
