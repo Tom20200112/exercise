@@ -1,12 +1,34 @@
-// 1. 支持 3 个级别：
-//    1 - 最弱，随机乱走
-//    2 - 偏弱，评分取前 N，再随机选一个
-//    3 - 最强，在 2 的基础上，加成五、活四、冲四等
-// 2. 命令行选择：难度级别、检查禁手、打印 Debug 信息
-//    ./gobang level1 debug
-// 3. 会把棋谱输出到 ./gobang.log 文件
-//
-// 术语：禁手(Forbidden)，活四(Open Fours)
+/*
+程序设计基础与实验（C语言）课程期末作业，实现了简单的五子棋程序。
+本程序有如下基本功能：
+1. 在界面上显示作者姓名，打印棋盘、棋子，并在每步棋下完后清屏、重新输出落子后的棋局。
+2. 读取玩家输入的落子坐标，在机器落子后输出机器落子的坐标。
+3. 每步棋后能正确判断胜负，支持连续多步悔棋。
+4. 可记录棋谱，并把棋谱输入到 ./gobang.log 文件中。
+
+可选择如下模式：
+1. 人人对战
+双方交替输入落子坐标即可。可通过命令行参数决定是否打开禁手判断。
+2. 人机对战
+(1). 支持 3 个难度级别：
+    1 - 最弱，随机乱走
+    2 - 偏弱，评分取前 N，再随机选一个
+    3 - 最强，在 2 的基础上，加成五、活四、冲四等判断
+(2). 玩家自行选择先后手，每次输入落子坐标即可。可通过命令行参数决定是否打开禁手判断，机器落子不受禁手限制。
+
+备注：
+1. 命令行参数
+./gobang [debug] [forbidden] [level(1-3)] 选择是否打印debug信息、检查禁手、难度级别。
+2. 术语
+禁手(Forbidden)，成五(Chengwu)，活四(Huosi)，冲四(Chongsi)，长连(Changlian)，四四(Sisi)，三三(Sansan)
+3. 基本操作
+(1). 选择命令行参数，运行程序。
+(2). 选择模式，在屏幕上相应提示信息处输入1为人机对战，2为人人对战。
+(3). 若为人机对战，还需决定先后手，在屏幕上相应提示信息处输入1为玩家执黑，2为玩家执白。
+(4). 玩家下棋时，以字母+数字方式输入自己的落子坐标，如H10，不区分大小写。
+(5). 输入R或r可悔棋。
+*/
+
 #include <assert.h>
 #include <ctype.h>
 #include <math.h>
@@ -142,13 +164,13 @@ void logMove(int currentSide, int x, int y) {
     }
 }
 
-// 获得用户的走子位置
+// 获得玩家的落子位置
 void getPosition(int *x, int *y) {
     int c;
 
     *x = *y = 0;
 
-    // Eat the \n and other spaces
+    // 吃掉 \n 等空格
     while (isspace(c = getchar())) {
         ;
     }
@@ -174,6 +196,7 @@ void getPosition(int *x, int *y) {
     }
 }
 
+// 刷新棋盘，将Play*CurrentPic(当前落子图标)变为Play*Pic(已有棋子图标)
 void refresh(void) {
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
@@ -186,7 +209,7 @@ void refresh(void) {
     }
 }
 
-// color: 1 for black, 2 for white
+// color: 1是黑棋，2是白棋
 void addConnected(int color, int x, int y) {
     int temp = 2 * Move + color - 1;
 
@@ -228,6 +251,7 @@ void addConnected(int color, int x, int y) {
     }
 }
 
+// 判断color方是否获胜
 int detectWin(int color) {
     return (Pieces[2 * Move + color - 1].N + Pieces[2 * Move + color - 1].S + 1 >= 5) ||
            (Pieces[2 * Move + color - 1].E + Pieces[2 * Move + color - 1].W + 1 >= 5) ||
@@ -235,10 +259,12 @@ int detectWin(int color) {
            (Pieces[2 * Move + color - 1].SE + Pieces[2 * Move + color - 1].NW + 1 >= 5);
 }
 
+// 判断落子位置是否合法（有没有其他棋子占据）
 int isValid(int x, int y) {
     return (x == 'R') || (x >= 'A' && x < 'A' + SIZE && y >= 1 && y <= SIZE && RecordBoard[SIZE - y][x - 'A'] == 0);
 }
 
+// 为side方给棋盘上(i,j)点位评分
 void evaluateScore(int i, int j, int side) {
     for (int m = 0; m < 4; ++m) {
         MyBoardScore[i][j][side - 1].info[m].linkNum = 0;
@@ -334,7 +360,7 @@ void evaluateScore(int i, int j, int side) {
     }
 }
 
-// Sort descending
+// 比较两点的评分大小，以备把所有点按评分降序排列
 int cmpSorter(const void *a, const void *b) {
     int va = ((Sorter *)a)->score;
     int vb = ((Sorter *)b)->score;
@@ -347,6 +373,7 @@ int cmpSorter(const void *a, const void *b) {
     }
 }
 
+// side方选择一个评分最高的落子位置
 void chooseMove(int *x, int *y, int side) {
     Sorter sorter[SIZE * SIZE];
     int pos = 0;
@@ -361,7 +388,7 @@ void chooseMove(int *x, int *y, int side) {
         }
     }
 
-    // At least one valid point is found
+    // 找到至少一个合法点
     if (pos <= 0) {
         printf("No valid point found!\n");
         exit(1);
@@ -369,7 +396,7 @@ void chooseMove(int *x, int *y, int side) {
 
     qsort(sorter, pos, sizeof(Sorter), cmpSorter);
 
-    // Find the top N elements with the same scores
+    // 找出前N个并列分值最高的点
     int count = 1;
     for (int i = 1; i < pos; i++) {
         if (sorter[i].score == sorter[0].score) {
@@ -394,6 +421,7 @@ void chooseMove(int *x, int *y, int side) {
     *y = SIZE - sorter[random].i;
 }
 
+// 将记录side方成五数量及点位的数组初始化
 void initialChengwu(int side) {
     Chengwu[side - 1] = false;
 
@@ -401,6 +429,7 @@ void initialChengwu(int side) {
     ChengwuPoint[side - 1].j = -1;
 }
 
+// 将记录side方活四数量及点位的数组初始化
 void initialHuosi(int side) {
     Huosi[side - 1] = false;
 
@@ -411,6 +440,7 @@ void initialHuosi(int side) {
     HuosiPoint[side - 1][1].j = -1;
 }
 
+// 将记录side方冲四数量及点位的数组初始化
 void initialChongsi(int side) {
     Chongsi[side - 1] = false;
 
@@ -420,6 +450,7 @@ void initialChongsi(int side) {
     }
 }
 
+// 检测side方是否有一步成五的点位，若有，则记录坐标
 void checkChengwu(int side) {
     initialChengwu(side);
 
@@ -438,6 +469,7 @@ void checkChengwu(int side) {
     }
 }
 
+// 检测side方是否有一步成活四的点位，若有，则记录坐标
 void checkHuosi(int side) {
     int l = 0;
 
@@ -463,6 +495,7 @@ void checkHuosi(int side) {
     }
 }
 
+// 检测side方是否有一步成冲四的点位，若有，则记录坐标
 void checkChongsi(int side) {
     int l = 0;
 
@@ -487,6 +520,7 @@ void checkChongsi(int side) {
     }
 }
 
+// 计算机思考落子位置的主函数，将落子点位输出到指针x、y中
 void thinkPosition(int *x, int *y, int side) {
     switch (Level) {
         case 1:
@@ -580,12 +614,14 @@ void thinkPosition(int *x, int *y, int side) {
     }
 }
 
+// 当某方悔棋时，移除该棋子，重新打印棋局
 void removeConnected(int index) {
     RecordBoard[SIZE - Pieces[index].y][Pieces[index].x - 'A'] = 0;
     recordToDisplayArray();
     displayBoard();
 }
 
+// 当currentSide方悔棋时，移除对方的上步棋，再移除currentSide方的上步棋，返回true；若无棋可悔，返回false
 bool takeBackMove(int currentSide) {
     if (Move <= 0) {
         printf("No moves to take back!\n");
@@ -601,7 +637,7 @@ bool takeBackMove(int currentSide) {
     return true;
 }
 
-// return: if is a take back?
+// 轮到玩家side方走棋，等待输入。return: 是否是悔棋?
 bool humanNextMove(int side) {
     for (int i = 0; i < SIZE; ++i) {
         for (int j = 0; j < SIZE; ++j) {
@@ -624,10 +660,10 @@ bool humanNextMove(int side) {
         }
     } while (true);
 
-    // Log the move
+    // 记录棋谱到日志文件 LOG_FILE
     logMove(side, x, y);
 
-    if (x == 'R') {  // take back
+    if (x == 'R') {  // 悔棋
         takeBackMove(side);
         return true;
     } else {
@@ -648,7 +684,7 @@ bool humanNextMove(int side) {
     return false;
 }
 
-// return: if is a take back?
+// return: 是否是悔棋?
 bool human2HumanNextMove(int side) { return humanNextMove(side); }
 
 // 判断side方在(x, y)落子后是否形成五连
@@ -687,6 +723,7 @@ bool sansan(int x, int y, int side) {
     return sansanCount > 1;
 }
 
+// 把棋盘数组拷贝到另一个数组中
 void copyBoard(int a[SIZE][SIZE], int b[SIZE][SIZE]) {
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
@@ -695,6 +732,7 @@ void copyBoard(int a[SIZE][SIZE], int b[SIZE][SIZE]) {
     }
 }
 
+// 在想象的棋盘(ImagineMyBoardScore)中的(i,j)点位尝试落子并评分
 void imagineEvaluateScore(int i, int j, int side) {
     for (int m = 0; m < 4; ++m) {
         ImagineMyBoardScore[i][j][side - 1].info[m].linkNum = 0;
@@ -785,6 +823,7 @@ void imagineEvaluateScore(int i, int j, int side) {
     }
 }
 
+// 在想象的棋盘(ImagineMyBoardScore)中判断是否形成五连
 bool imagineWulian(int i, int j, int side) {
     for (int k = 0; k < 4; k++) {
         if (ImagineMyBoardScore[i][j][side - 1].info[k].linkNum == 4) {
@@ -795,18 +834,29 @@ bool imagineWulian(int i, int j, int side) {
     return false;
 }
 
+// 判断两个成五点point1和point2是否形成的是同一个五连
 bool coincideWulian(Point point1, Point point2, int side) {
     if (point1.i == point2.i) {
-        for (int i = 1; i < 5; i++) {
-            if (ImagineRecordBoard[point1.i][min(point1.j, point2.j) + i] != side) {
-                return false;
+        if (point1.j - point2.j == 5 || point1.j - point2.j == -5) {
+            for (int i = 1; i < 5; i++) {
+                if (ImagineRecordBoard[point1.i][min(point1.j, point2.j) + i] != side) {
+                    return false;
+                }
             }
+            return true;
+        } else {
+            return false;
         }
     } else if (point1.j == point2.j) {
-        for (int i = 1; i < 5; i++) {
-            if (ImagineRecordBoard[min(point1.i, point2.i) + i][point1.j] != side) {
-                return false;
+        if (point1.i - point2.i == 5 || point1.i - point2.i == -5) {
+            for (int i = 1; i < 5; i++) {
+                if (ImagineRecordBoard[min(point1.i, point2.i) + i][point1.j] != side) {
+                    return false;
+                }
             }
+            return true;
+        } else {
+            return false;
         }
 
     } else if (point2.j - point1.j == point2.i - point1.i && point2.j - point1.j == 5) {
@@ -870,7 +920,10 @@ bool forbidden(int x, int y, int side) {
     return side == BLACK && !wulian(x, y, side) && (changlian(x, y, side) || sansan(x, y, side) || sisi(x, y, side));
 }
 
-// return value: if is a take back?
+/*
+side为玩家方，currentSide为当前落子方。若side==currentSide，则等待落子，return:
+是否是悔棋?若否，则电脑想棋、落子、输出
+*/
 bool human2ComputerNextMove(int side, int currentSide) {
     if (side == currentSide) {
         return humanNextMove(side);
@@ -901,7 +954,7 @@ bool human2ComputerNextMove(int side, int currentSide) {
     return false;
 }
 
-// Clear stdin when scanf() failed to read wanted result.
+// 当scanf()读到错误内容时，清除标准输入
 void clearStdin() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF) {
@@ -909,6 +962,7 @@ void clearStdin() {
     }
 }
 
+// 处理命令行参数
 void getOptions(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         char *option = argv[i];
