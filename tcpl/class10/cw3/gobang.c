@@ -1,7 +1,7 @@
 // 1. 支持 3 个级别：
 //    1 - 最弱，随机乱走
 //    2 - 偏弱，评分取前 N，再随机选一个
-//    3 - 最强，在 2 的基础上，加重五、活四、重四等
+//    3 - 最强，在 2 的基础上，加成五、活四、冲四等
 // 2. 命令行选择：难度级别、检查禁手、打印 Debug 信息
 //    ./gobang level1 debug
 // 3. 会把棋谱输出到 ./gobang.log 文件
@@ -19,13 +19,13 @@
 
 // Macros
 #define SIZE 15
-#define CHARSIZE 3 // 2 for GBK, 3 for UTF-8
+#define CHARSIZE 3  // 2 for GBK, 3 for UTF-8
 #define MAX_LINE 128
 #define LOG_FILE "./gobang.log"
 
 // Types
 typedef struct Connected {
-    int color; // 1 for black, 2 for white
+    int color;  // 1 for black, 2 for white
     int x, y;
     int N, S, E, W;
     int NE, NW, SE, SW;
@@ -37,13 +37,13 @@ typedef struct Sorter {
 } Sorter;
 
 typedef struct SingleInfo {
-    int linkNum; // 连珠数量
-    int oppNum; // 两端对手棋子数量
+    int linkNum;  // 连珠数量
+    int oppNum;   // 两端对手棋子数量
 } SingleInfo;
 
 typedef struct SingleScore {
-    SingleInfo info[4]; // 记录四个方向连珠信息
-    int score; // 当前点评分
+    SingleInfo info[4];  // 记录四个方向连珠信息
+    int score;           // 当前点评分
 } SingleScore;
 
 typedef struct Point {
@@ -56,15 +56,9 @@ void initRecordBoard(void);
 void recordToDisplayArray(void);
 void displayBoard(void);
 
-int max(int x, int y)
-{
-    return x > y ? x : y;
-}
+int max(int x, int y) { return x > y ? x : y; }
 
-int min(int x, int y)
-{
-    return x < y ? x : y;
-}
+int min(int x, int y) { return x < y ? x : y; }
 
 // Variables
 bool Debug = false;
@@ -72,22 +66,20 @@ bool Forbidden = false;
 int Level = 1;
 int Move = 0;
 
-bool Chengwu[2] = { false, false };
-bool Huosi[2] = { false, false };
-bool Chongsi[2] = { false, false };
+bool Chengwu[2] = {false, false};
+bool Huosi[2] = {false, false};
+bool Chongsi[2] = {false, false};
 
-Point ChengwuPoint[2] = { { -1, -1 }, { -1, -1 } };
-Point HuosiPoint[2][2] = { { { -1, -1 }, { -1, -1 } }, { { -1, -1 }, { -1, -1 } } };
-Point ChongsiPoint[2][2] = { { { -1, -1 }, { -1, -1 } }, { { -1, -1 }, { -1, -1 } } };
-Point ImagineWulian[5] = { { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 } };
+Point ChengwuPoint[2] = {{-1, -1}, {-1, -1}};
+Point HuosiPoint[2][2] = {{{-1, -1}, {-1, -1}}, {{-1, -1}, {-1, -1}}};
+Point ChongsiPoint[2][2] = {{{-1, -1}, {-1, -1}}, {{-1, -1}, {-1, -1}}};
+Point ImagineWulian[5] = {{-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}};
 
-char* Color[2] = { "Black", "White" };
+char *Color[2] = {"Black", "White"};
 // 注意，枚举值从 1 开始，数组 Color 下标从 0 开始
-enum Side { BLACK = 1,
-    WHITE = 2 };
+enum Side { BLACK = 1, WHITE = 2 };
 
-enum Mode { HUMAN2COMPUTER = 1,
-    HUMAN2HUMAN = 2 };
+enum Mode { HUMAN2COMPUTER = 1, HUMAN2HUMAN = 2 };
 
 Connected Pieces[SIZE * SIZE];
 
@@ -116,10 +108,10 @@ char InitDisplayBoardArray[SIZE][SIZE * CHARSIZE + 1] = {
 // 此数组用于显示棋盘
 char DisplayBoardArray[SIZE][SIZE * CHARSIZE + 1];
 
-char Play1Pic[] = "●"; // 黑棋子;
+char Play1Pic[] = "●";  // 黑棋子;
 char Play1CurrentPic[] = "▲";
 
-char Play2Pic[] = "◎"; // 白棋子;
+char Play2Pic[] = "◎";  // 白棋子;
 char Play2CurrentPic[] = "△";
 
 // 此数组用于记录棋盘格局
@@ -127,14 +119,13 @@ int RecordBoard[SIZE][SIZE];
 int ImagineRecordBoard[SIZE][SIZE];
 
 // 记录棋谱到日志文件 LOG_FILE
-void logMove(int currentSide, int x, int y)
-{
-    static FILE* fp = NULL;
+void logMove(int currentSide, int x, int y) {
+    static FILE *fp = NULL;
     // 第一次调用 lovMove() 时需要先打开文件
     if (fp == NULL) {
-        fp = fopen(LOG_FILE, "a"); // 追加模式打开文件，总是在文件尾部追加日志
+        fp = fopen(LOG_FILE, "a");  // 追加模式打开文件，总是在文件尾部追加日志
         assert(fp != NULL);
-        char* banner = "New game...\n";
+        char *banner = "New game...\n";
         size_t sz = strlen(banner) * sizeof(char);
         size_t rc = fwrite(banner, sz, 1, fp);
         assert(rc == 1);
@@ -152,8 +143,7 @@ void logMove(int currentSide, int x, int y)
 }
 
 // 获得用户的走子位置
-void getPosition(int* x, int* y)
-{
+void getPosition(int *x, int *y) {
     int c;
 
     *x = *y = 0;
@@ -184,8 +174,7 @@ void getPosition(int* x, int* y)
     }
 }
 
-void refresh(void)
-{
+void refresh(void) {
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             if (RecordBoard[i][j] == 3) {
@@ -198,8 +187,7 @@ void refresh(void)
 }
 
 // color: 1 for black, 2 for white
-void addConnected(int color, int x, int y)
-{
+void addConnected(int color, int x, int y) {
     int temp = 2 * Move + color - 1;
 
     Pieces[temp].color = color;
@@ -240,18 +228,18 @@ void addConnected(int color, int x, int y)
     }
 }
 
-int detectWin(int color)
-{
-    return (Pieces[2 * Move + color - 1].N + Pieces[2 * Move + color - 1].S + 1 >= 5) || (Pieces[2 * Move + color - 1].E + Pieces[2 * Move + color - 1].W + 1 >= 5) || (Pieces[2 * Move + color - 1].SW + Pieces[2 * Move + color - 1].NE + 1 >= 5) || (Pieces[2 * Move + color - 1].SE + Pieces[2 * Move + color - 1].NW + 1 >= 5);
+int detectWin(int color) {
+    return (Pieces[2 * Move + color - 1].N + Pieces[2 * Move + color - 1].S + 1 >= 5) ||
+           (Pieces[2 * Move + color - 1].E + Pieces[2 * Move + color - 1].W + 1 >= 5) ||
+           (Pieces[2 * Move + color - 1].SW + Pieces[2 * Move + color - 1].NE + 1 >= 5) ||
+           (Pieces[2 * Move + color - 1].SE + Pieces[2 * Move + color - 1].NW + 1 >= 5);
 }
 
-int isValid(int x, int y)
-{
+int isValid(int x, int y) {
     return (x == 'R') || (x >= 'A' && x < 'A' + SIZE && y >= 1 && y <= SIZE && RecordBoard[SIZE - y][x - 'A'] == 0);
 }
 
-void evaluateScore(int i, int j, int side)
-{
+void evaluateScore(int i, int j, int side) {
     for (int m = 0; m < 4; ++m) {
         MyBoardScore[i][j][side - 1].info[m].linkNum = 0;
         MyBoardScore[i][j][side - 1].info[m].oppNum = 0;
@@ -295,7 +283,8 @@ void evaluateScore(int i, int j, int side)
             MyBoardScore[i][j][side - 1].info[1].oppNum++;
         }
 
-        for (m = 1; i + m < SIZE && j + m < SIZE && (RecordBoard[i + m][j + m] == side || RecordBoard[i + m][j + m] == side + 2);
+        for (m = 1; i + m < SIZE && j + m < SIZE &&
+                    (RecordBoard[i + m][j + m] == side || RecordBoard[i + m][j + m] == side + 2);
              m++) {
             MyBoardScore[i][j][side - 1].info[2].linkNum++;
         }
@@ -338,17 +327,17 @@ void evaluateScore(int i, int j, int side)
             if (MyBoardScore[i][j][side - 1].info[n].linkNum >= 4) {
                 MyBoardScore[i][j][side - 1].score += 200;
             } else {
-                MyBoardScore[i][j][side - 1].score += (MyBoardScore[i][j][side - 1].info[n].linkNum) * (4 - 2 * (MyBoardScore[i][j][side - 1].info[n].oppNum));
+                MyBoardScore[i][j][side - 1].score += (MyBoardScore[i][j][side - 1].info[n].linkNum) *
+                                                      (4 - 2 * (MyBoardScore[i][j][side - 1].info[n].oppNum));
             }
         }
     }
 }
 
 // Sort descending
-int cmpSorter(const void* a, const void* b)
-{
-    int va = ((Sorter*)a)->score;
-    int vb = ((Sorter*)b)->score;
+int cmpSorter(const void *a, const void *b) {
+    int va = ((Sorter *)a)->score;
+    int vb = ((Sorter *)b)->score;
     if (va < vb) {
         return 1;
     } else if (va > vb) {
@@ -358,8 +347,7 @@ int cmpSorter(const void* a, const void* b)
     }
 }
 
-void chooseMove(int* x, int* y, int side)
-{
+void chooseMove(int *x, int *y, int side) {
     Sorter sorter[SIZE * SIZE];
     int pos = 0;
     for (int i = 0; i < SIZE; i++) {
@@ -406,16 +394,14 @@ void chooseMove(int* x, int* y, int side)
     *y = SIZE - sorter[random].i;
 }
 
-void initialChengwu(int side)
-{
+void initialChengwu(int side) {
     Chengwu[side - 1] = false;
 
     ChengwuPoint[side - 1].i = -1;
     ChengwuPoint[side - 1].j = -1;
 }
 
-void initialHuosi(int side)
-{
+void initialHuosi(int side) {
     Huosi[side - 1] = false;
 
     HuosiPoint[side - 1][0].i = -1;
@@ -425,8 +411,7 @@ void initialHuosi(int side)
     HuosiPoint[side - 1][1].j = -1;
 }
 
-void initialChongsi(int side)
-{
+void initialChongsi(int side) {
     Chongsi[side - 1] = false;
 
     for (int j = 0; j < 2; j++) {
@@ -435,8 +420,7 @@ void initialChongsi(int side)
     }
 }
 
-void checkChengwu(int side)
-{
+void checkChengwu(int side) {
     initialChengwu(side);
 
     for (int i = 0; i < SIZE; i++) {
@@ -454,8 +438,7 @@ void checkChengwu(int side)
     }
 }
 
-void checkHuosi(int side)
-{
+void checkHuosi(int side) {
     int l = 0;
 
     initialHuosi(side);
@@ -463,7 +446,8 @@ void checkHuosi(int side)
     for (int i = 1; i < SIZE - 1; i++) {
         for (int j = 1; j < SIZE - 1; j++) {
             for (int k = 0; k < 4; k++) {
-                if (MyBoardScore[i][j][side - 1].info[k].linkNum == 3 && MyBoardScore[i][j][side - 1].info[k].oppNum == 0) {
+                if (MyBoardScore[i][j][side - 1].info[k].linkNum == 3 &&
+                    MyBoardScore[i][j][side - 1].info[k].oppNum == 0) {
                     if (l < 2) {
                         HuosiPoint[side - 1][l].i = i;
                         HuosiPoint[side - 1][l].j = j;
@@ -479,8 +463,7 @@ void checkHuosi(int side)
     }
 }
 
-void checkChongsi(int side)
-{
+void checkChongsi(int side) {
     int l = 0;
 
     initialChongsi(side);
@@ -488,7 +471,8 @@ void checkChongsi(int side)
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             for (int k = 0; k < 4; k++) {
-                if (MyBoardScore[i][j][side - 1].info[k].linkNum == 3 && MyBoardScore[i][j][side - 1].info[k].oppNum == 1) {
+                if (MyBoardScore[i][j][side - 1].info[k].linkNum == 3 &&
+                    MyBoardScore[i][j][side - 1].info[k].oppNum == 1) {
                     if (l < 2) {
                         ChongsiPoint[side - 1][l].i = i;
                         ChongsiPoint[side - 1][l].j = j;
@@ -503,109 +487,106 @@ void checkChongsi(int side)
     }
 }
 
-void thinkPosition(int* x, int* y, int side)
-{
+void thinkPosition(int *x, int *y, int side) {
     switch (Level) {
-    case 1:
-        do {
-            *x = random() % SIZE;
-            *y = random() % SIZE;
-        } while (!isValid(*x + 'A', *y));
-        *x += 'A';
-        break;
-    case 2:
-    case 3:
-        for (int i = 0; i < SIZE; ++i) {
-            for (int j = 0; j < SIZE; ++j) {
-                evaluateScore(i, j, side);
-                evaluateScore(i, j, 3 - side);
+        case 1:
+            do {
+                *x = random() % SIZE;
+                *y = random() % SIZE;
+            } while (!isValid(*x + 'A', *y));
+            *x += 'A';
+            break;
+        case 2:
+        case 3:
+            for (int i = 0; i < SIZE; ++i) {
+                for (int j = 0; j < SIZE; ++j) {
+                    evaluateScore(i, j, side);
+                    evaluateScore(i, j, 3 - side);
+                }
             }
-        }
 
-        if (Level == 2) {
-            chooseMove(x, y, side);
-            return;
-        }
+            if (Level == 2) {
+                chooseMove(x, y, side);
+                return;
+            }
 
-        checkChengwu(side);
-        checkChengwu(3 - side);
+            checkChengwu(side);
+            checkChengwu(3 - side);
 
-        checkHuosi(side);
-        checkHuosi(3 - side);
+            checkHuosi(side);
+            checkHuosi(3 - side);
 
-        checkChongsi(side);
-        checkChongsi(3 - side);
+            checkChongsi(side);
+            checkChongsi(3 - side);
 
-        if (Debug) {
-            printf("ifChengwu: %d\n", Chengwu[side - 1]);
-            printf("Chengwu:");
-            printf("(%d, %d)\n", ChengwuPoint[side - 1].i, ChengwuPoint[side - 1].j);
-            printf("oppChengwu:(%d, %d)\n", ChengwuPoint[2 - side].i, ChengwuPoint[2 - side].j);
+            if (Debug) {
+                printf("ifChengwu: %d\n", Chengwu[side - 1]);
+                printf("Chengwu:");
+                printf("(%d, %d)\n", ChengwuPoint[side - 1].i, ChengwuPoint[side - 1].j);
+                printf("oppChengwu:(%d, %d)\n", ChengwuPoint[2 - side].i, ChengwuPoint[2 - side].j);
 
-            printf("ifHuosi: %d\n", Huosi[side - 1]);
-            printf("Huosi:");
-            printf("(%d, %d)\n", HuosiPoint[side - 1][0].i, HuosiPoint[side - 1][0].j);
-            printf("oppHuosi:(%d, %d)\n", HuosiPoint[2 - side][0].i, HuosiPoint[2 - side][0].j);
+                printf("ifHuosi: %d\n", Huosi[side - 1]);
+                printf("Huosi:");
+                printf("(%d, %d)\n", HuosiPoint[side - 1][0].i, HuosiPoint[side - 1][0].j);
+                printf("oppHuosi:(%d, %d)\n", HuosiPoint[2 - side][0].i, HuosiPoint[2 - side][0].j);
 
-            printf("ifChongsi: %d\n", Chongsi[side - 1]);
-            printf("Chongsi:");
-            printf("(%d, %d)\n", ChongsiPoint[side - 1][0].i, ChongsiPoint[side - 1][0].j);
-            printf("oppChongsi:(%d, %d)\n", ChongsiPoint[2 - side][0].i, ChongsiPoint[2 - side][0].j);
-        }
+                printf("ifChongsi: %d\n", Chongsi[side - 1]);
+                printf("Chongsi:");
+                printf("(%d, %d)\n", ChongsiPoint[side - 1][0].i, ChongsiPoint[side - 1][0].j);
+                printf("oppChongsi:(%d, %d)\n", ChongsiPoint[2 - side][0].i, ChongsiPoint[2 - side][0].j);
+            }
 
-        if (Chengwu[side - 1]) {
-            *x = ChengwuPoint[side - 1].j + 'A';
-            *y = SIZE - ChengwuPoint[side - 1].i;
-        } else if (Chengwu[2 - side]) {
-            *x = ChengwuPoint[2 - side].j + 'A';
-            *y = SIZE - ChengwuPoint[2 - side].i;
-        } else if (Huosi[side - 1]) {
-            int random;
-            do {
-                random = rand() % 2;
-                *x = HuosiPoint[side - 1][random].j + 'A';
-                *y = SIZE - HuosiPoint[side - 1][random].i;
-            } while (HuosiPoint[side - 1][random].j < 0);
-        } else if (Huosi[2 - side]) {
-            int random;
-            do {
-                random = rand() % 2;
-                *x = HuosiPoint[2 - side][random].j + 'A';
-                *y = SIZE - HuosiPoint[2 - side][random].i;
-            } while (HuosiPoint[2 - side][random].j < 0);
-        } else if (Chongsi[side - 1]) {
-            int random;
-            do {
-                random = rand() % 2;
-                *x = ChongsiPoint[side - 1][random].j + 'A';
-                *y = SIZE - ChongsiPoint[side - 1][random].i;
-            } while (ChongsiPoint[side - 1][random].j < 0);
-        } else if (Chongsi[2 - side]) {
-            int random;
-            do {
-                random = rand() % 2;
-                *x = ChongsiPoint[2 - side][random].j + 'A';
-                *y = SIZE - ChongsiPoint[2 - side][random].i;
-            } while (ChongsiPoint[2 - side][random].j < 0);
-        } else {
-            chooseMove(x, y, side);
-        }
-        break;
-    default:
-        assert(false);
-        break;
+            if (Chengwu[side - 1]) {
+                *x = ChengwuPoint[side - 1].j + 'A';
+                *y = SIZE - ChengwuPoint[side - 1].i;
+            } else if (Chengwu[2 - side]) {
+                *x = ChengwuPoint[2 - side].j + 'A';
+                *y = SIZE - ChengwuPoint[2 - side].i;
+            } else if (Huosi[side - 1]) {
+                int random;
+                do {
+                    random = rand() % 2;
+                    *x = HuosiPoint[side - 1][random].j + 'A';
+                    *y = SIZE - HuosiPoint[side - 1][random].i;
+                } while (HuosiPoint[side - 1][random].j < 0);
+            } else if (Huosi[2 - side]) {
+                int random;
+                do {
+                    random = rand() % 2;
+                    *x = HuosiPoint[2 - side][random].j + 'A';
+                    *y = SIZE - HuosiPoint[2 - side][random].i;
+                } while (HuosiPoint[2 - side][random].j < 0);
+            } else if (Chongsi[side - 1]) {
+                int random;
+                do {
+                    random = rand() % 2;
+                    *x = ChongsiPoint[side - 1][random].j + 'A';
+                    *y = SIZE - ChongsiPoint[side - 1][random].i;
+                } while (ChongsiPoint[side - 1][random].j < 0);
+            } else if (Chongsi[2 - side]) {
+                int random;
+                do {
+                    random = rand() % 2;
+                    *x = ChongsiPoint[2 - side][random].j + 'A';
+                    *y = SIZE - ChongsiPoint[2 - side][random].i;
+                } while (ChongsiPoint[2 - side][random].j < 0);
+            } else {
+                chooseMove(x, y, side);
+            }
+            break;
+        default:
+            assert(false);
+            break;
     }
 }
 
-void removeConnected(int index)
-{
+void removeConnected(int index) {
     RecordBoard[SIZE - Pieces[index].y][Pieces[index].x - 'A'] = 0;
     recordToDisplayArray();
     displayBoard();
 }
 
-bool takeBackMove(int currentSide)
-{
+bool takeBackMove(int currentSide) {
     if (Move <= 0) {
         printf("No moves to take back!\n");
         return false;
@@ -621,8 +602,7 @@ bool takeBackMove(int currentSide)
 }
 
 // return: if is a take back?
-bool humanNextMove(int side)
-{
+bool humanNextMove(int side) {
     for (int i = 0; i < SIZE; ++i) {
         for (int j = 0; j < SIZE; ++j) {
             evaluateScore(i, j, side);
@@ -647,7 +627,7 @@ bool humanNextMove(int side)
     // Log the move
     logMove(side, x, y);
 
-    if (x == 'R') { // take back
+    if (x == 'R') {  // take back
         takeBackMove(side);
         return true;
     } else {
@@ -672,8 +652,7 @@ bool humanNextMove(int side)
 bool human2HumanNextMove(int side) { return humanNextMove(side); }
 
 // 判断side方在(x, y)落子后是否形成五连
-bool wulian(int x, int y, int side)
-{
+bool wulian(int x, int y, int side) {
     for (int k = 0; k < 4; k++) {
         if (MyBoardScore[SIZE - y][x - 'A'][side - 1].info[k].linkNum == 4) {
             return true;
@@ -684,8 +663,7 @@ bool wulian(int x, int y, int side)
 }
 
 // 判断side方在(x, y)落子后是否形成长连
-bool changlian(int x, int y, int side)
-{
+bool changlian(int x, int y, int side) {
     for (int k = 0; k < 4; k++) {
         if (MyBoardScore[SIZE - y][x - 'A'][side - 1].info[k].linkNum > 4) {
             return true;
@@ -696,12 +674,12 @@ bool changlian(int x, int y, int side)
 }
 
 // 判断 side 方在(x, y)落子后是否形成三三
-bool sansan(int x, int y, int side)
-{
+bool sansan(int x, int y, int side) {
     int sansanCount = 0;
 
     for (int k = 0; k < 4; k++) {
-        if (MyBoardScore[SIZE - y][x - 'A'][side - 1].info[k].linkNum == 2 && MyBoardScore[SIZE - y][x - 'A'][side - 1].info[k].oppNum == 0) {
+        if (MyBoardScore[SIZE - y][x - 'A'][side - 1].info[k].linkNum == 2 &&
+            MyBoardScore[SIZE - y][x - 'A'][side - 1].info[k].oppNum == 0) {
             sansanCount++;
         }
     }
@@ -709,8 +687,7 @@ bool sansan(int x, int y, int side)
     return sansanCount > 1;
 }
 
-void copyBoard(int a[SIZE][SIZE], int b[SIZE][SIZE])
-{
+void copyBoard(int a[SIZE][SIZE], int b[SIZE][SIZE]) {
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             b[i][j] = a[i][j];
@@ -718,8 +695,7 @@ void copyBoard(int a[SIZE][SIZE], int b[SIZE][SIZE])
     }
 }
 
-void imagineEvaluateScore(int i, int j, int side)
-{
+void imagineEvaluateScore(int i, int j, int side) {
     for (int m = 0; m < 4; ++m) {
         ImagineMyBoardScore[i][j][side - 1].info[m].linkNum = 0;
         ImagineMyBoardScore[i][j][side - 1].info[m].oppNum = 0;
@@ -767,7 +743,8 @@ void imagineEvaluateScore(int i, int j, int side)
             ImagineMyBoardScore[i][j][side - 1].info[1].oppNum++;
         }
 
-        for (m = 1; i + m < SIZE && j + m < SIZE && (ImagineRecordBoard[i + m][j + m] == side || ImagineRecordBoard[i + m][j + m] == side + 2);
+        for (m = 1; i + m < SIZE && j + m < SIZE &&
+                    (ImagineRecordBoard[i + m][j + m] == side || ImagineRecordBoard[i + m][j + m] == side + 2);
              m++) {
             ImagineMyBoardScore[i][j][side - 1].info[2].linkNum++;
         }
@@ -776,7 +753,8 @@ void imagineEvaluateScore(int i, int j, int side)
             ImagineMyBoardScore[i][j][side - 1].info[2].oppNum++;
         }
 
-        for (m = 1; i - m >= 0 && j - m >= 0 && (ImagineRecordBoard[i - m][j - m] == side || ImagineRecordBoard[i - m][j - m] == side + 2);
+        for (m = 1; i - m >= 0 && j - m >= 0 &&
+                    (ImagineRecordBoard[i - m][j - m] == side || ImagineRecordBoard[i - m][j - m] == side + 2);
              m++) {
             ImagineMyBoardScore[i][j][side - 1].info[2].linkNum++;
         }
@@ -785,7 +763,8 @@ void imagineEvaluateScore(int i, int j, int side)
             ImagineMyBoardScore[i][j][side - 1].info[2].oppNum++;
         }
 
-        for (m = 1; i + m < SIZE && j - m >= 0 && (ImagineRecordBoard[i + m][j - m] == side || ImagineRecordBoard[i + m][j - m] == side + 2);
+        for (m = 1; i + m < SIZE && j - m >= 0 &&
+                    (ImagineRecordBoard[i + m][j - m] == side || ImagineRecordBoard[i + m][j - m] == side + 2);
              m++) {
             ImagineMyBoardScore[i][j][side - 1].info[3].linkNum++;
         }
@@ -794,7 +773,8 @@ void imagineEvaluateScore(int i, int j, int side)
             ImagineMyBoardScore[i][j][side - 1].info[3].oppNum++;
         }
 
-        for (m = 1; i - m >= 0 && j + m < SIZE && (ImagineRecordBoard[i - m][j + m] == side || ImagineRecordBoard[i - m][j + m] == side + 2);
+        for (m = 1; i - m >= 0 && j + m < SIZE &&
+                    (ImagineRecordBoard[i - m][j + m] == side || ImagineRecordBoard[i - m][j + m] == side + 2);
              m++) {
             ImagineMyBoardScore[i][j][side - 1].info[3].linkNum++;
         }
@@ -805,8 +785,7 @@ void imagineEvaluateScore(int i, int j, int side)
     }
 }
 
-bool imagineWulian(int i, int j, int side)
-{
+bool imagineWulian(int i, int j, int side) {
     for (int k = 0; k < 4; k++) {
         if (ImagineMyBoardScore[i][j][side - 1].info[k].linkNum == 4) {
             return true;
@@ -816,8 +795,7 @@ bool imagineWulian(int i, int j, int side)
     return false;
 }
 
-bool coincideWulian(Point point1, Point point2, int side)
-{
+bool coincideWulian(Point point1, Point point2, int side) {
     if (point1.i == point2.i) {
         for (int i = 1; i < 5; i++) {
             if (ImagineRecordBoard[point1.i][min(point1.j, point2.j) + i] != side) {
@@ -861,8 +839,7 @@ bool coincideWulian(Point point1, Point point2, int side)
 }
 
 // 判断side方在(x, y)落子后是否形成四四
-bool sisi(int x, int y, int side)
-{
+bool sisi(int x, int y, int side) {
     int sisiCount = 0;
 
     copyBoard(RecordBoard, ImagineRecordBoard);
@@ -884,8 +861,7 @@ bool sisi(int x, int y, int side)
 }
 
 // 禁手只对黑方管用
-bool forbidden(int x, int y, int side)
-{
+bool forbidden(int x, int y, int side) {
     // 禁手功能没有打开
     if (!Forbidden) {
         return false;
@@ -895,8 +871,7 @@ bool forbidden(int x, int y, int side)
 }
 
 // return value: if is a take back?
-bool human2ComputerNextMove(int side, int currentSide)
-{
+bool human2ComputerNextMove(int side, int currentSide) {
     if (side == currentSide) {
         return humanNextMove(side);
     }
@@ -927,18 +902,16 @@ bool human2ComputerNextMove(int side, int currentSide)
 }
 
 // Clear stdin when scanf() failed to read wanted result.
-void clearStdin()
-{
+void clearStdin() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF) {
         ;
     }
 }
 
-void getOptions(int argc, char* argv[])
-{
+void getOptions(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
-        char* option = argv[i];
+        char *option = argv[i];
         if (strcmp(option, "debug") == 0) {
             Debug = true;
         } else if (strcmp(option, "level1") == 0) {
@@ -955,12 +928,11 @@ void getOptions(int argc, char* argv[])
     }
 
     printf("Use options: level=%d, forbidden=%s, debug=%s\n", Level, Forbidden ? "true" : "false",
-        Debug ? "true" : "false");
+           Debug ? "true" : "false");
     assert(Level >= 1 && Level <= 3);
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
     int mode, side;
 
     initRecordBoard();
@@ -1020,8 +992,7 @@ int main(int argc, char* argv[])
 }
 
 // 初始化棋盘格局
-void initRecordBoard(void)
-{
+void initRecordBoard(void) {
     // 通过双重循环，将 RecordBoard 清 0
     for (int i = 0; i < SIZE; ++i) {
         for (int j = 0; j < SIZE; ++j) {
@@ -1031,8 +1002,7 @@ void initRecordBoard(void)
 }
 
 // 将 RecordBoard 中记录的棋子位置，转化到 DisplayBoardArray 中
-void recordToDisplayArray(void)
-{
+void recordToDisplayArray(void) {
     // 第一步：将 InitDisplayBoardArray 中记录的空棋盘，复制到 DisplayBoardArray 中
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE * CHARSIZE + 1; j++) {
@@ -1075,12 +1045,11 @@ void recordToDisplayArray(void)
 }
 
 // 显示棋盘格局
-void displayBoard(void)
-{
+void displayBoard(void) {
     // 第一步：清屏
     // 注释掉下面这个 clear 可以方便调试
     if (!Debug) {
-        system("clear"); // 清屏
+        system("clear");  // 清屏
     }
 
     printf("Work of 张治成\n");
