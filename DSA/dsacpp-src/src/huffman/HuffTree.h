@@ -8,4 +8,6 @@
 
 #pragma once
 
-using HuffTree = BinTree<HuffChar>; //Huffman树，由BinTree派生，节点类型为HuffChar
+#include "huffChar.h"
+
+using HuffTree = BinTree<HuffChar>;  // Huffman树，由BinTree派生，节点类型为HuffChar

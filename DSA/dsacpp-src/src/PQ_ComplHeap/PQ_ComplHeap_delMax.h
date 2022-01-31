@@ -9,7 +9,7 @@
 #pragma once
 
 template <typename T> T PQ_ComplHeap<T>::delMax() { //删除非空完全二叉堆中优先级最高的词条
-   T maxElem = _elem[0]; _elem[0] = _elem[ --_size ]; //摘除堆顶（首词条），代之以末词条
-   percolateDown ( _elem, _size, 0 ); //对新堆顶实施下滤
+   T maxElem = this->_elem[0]; this->_elem[0] = this->_elem[ --this->_size ]; //摘除堆顶（首词条），代之以末词条
+   percolateDown ( this->_elem, this->_size, 0 ); //对新堆顶实施下滤
    return maxElem; //返回此前备份的最大词条
 }

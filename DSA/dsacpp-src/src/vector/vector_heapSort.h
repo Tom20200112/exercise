@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "PQ_ComplHeap/PQ_ComplHeap_Heapify.h"
+
 template <typename T> void Vector<T>::heapSort ( Rank lo, Rank hi ) { //0 <= lo < hi <= size
    /*DSA*/ //printf ( "\tHEAPsort [%3d, %3d)\n", lo, hi );
    T* A = _elem + lo; Rank n = hi - lo; heapify( A, n ); //将待排序区间建成一个完全二叉堆，O(n)

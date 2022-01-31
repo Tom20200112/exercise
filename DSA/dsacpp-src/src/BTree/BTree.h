@@ -22,8 +22,8 @@ public:
    BTree ( int order = 3 ) : _order ( order ), _size ( 0 ) //构造函数：默认为最低的3阶
    { _root = new BTNode<T>(); }
    ~BTree() { if ( _root ) release ( _root ); } //析构函数：释放所有节点
-   int const order() { return _order; } //阶次
-   int const size() { return _size; } //规模
+   int  order() { return _order; } //阶次
+   int  size() { return _size; } //规模
    BTNodePosi<T> & root() { return _root; } //树根
    bool empty() const { return !_root; } //判空
    BTNodePosi<T> search ( const T& e ); //查找

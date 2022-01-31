@@ -23,4 +23,4 @@ template <typename T> struct QuadlistNode { //QuadlistNode模板类
    ( T const& e, QListNodePosi<T> b = NULL );
 };
 
-#include "QuadlistNode_implementation.h"
+#include "QuadListNode_implementation.h"

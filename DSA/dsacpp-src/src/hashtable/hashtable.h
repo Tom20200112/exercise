@@ -9,7 +9,7 @@
 #pragma once
 
 #include "Dictionary/Dictionary.h" //引入词典ADT
-#include "Bitmap/Bitmap.h" //引入位图
+#include "BitMap/Bitmap.h" //引入位图
 
 template <typename K, typename V> //key、value
 class Hashtable : public Dictionary<K, V> { //符合Dictionary接口的Hashtable模板类
@@ -31,4 +31,4 @@ public:
    bool remove ( K k ); //删除
 };
 
-#include "Hashtable_implementation.h"
+#include "hashtable_implementation.h"

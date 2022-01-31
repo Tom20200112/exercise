@@ -11,7 +11,7 @@
 /******************************************************************************************
  * BTree输出打印
  ******************************************************************************************/
-#include "Bitmap/Bitmap.h" //使用位图记录分支转向
+#include "BitMap/Bitmap.h" //使用位图记录分支转向
 
 /******************************************************************************************
  * BTree打印（入口）
@@ -42,10 +42,10 @@ static void printBTree ( BTNodePosi<T> bt, int depth, bool isLeftmost, bool isRi
       /*DSA*/printf ( parentOK ? " " : "X" );
       print ( bt->key[k] ); printf ( " *>" );
       for ( int i = 0; i < depth; i++ ) //根据相邻各层
-         ( leftmosts->test ( i ) && leftmosts->test ( i + 1 ) || rightmosts->test ( i ) && rightmosts->test ( i + 1 ) ) ? //的拐向是否一致，即可确定
+         ( (leftmosts->test ( i ) && leftmosts->test ( i + 1 )) || (rightmosts->test ( i ) && rightmosts->test ( i + 1 )) ) ? //的拐向是否一致，即可确定
          printf ( "      " ) : printf ( "│    " ); //是否应该打印横向联接线
-      if ( ( ( 0 == depth && 1 < bt->key.size() ) || !isLeftmost && isRightmost ) && bt->key.size() - 1 == k ) printf ( "┌─" );
-      else if ( ( ( 0 == depth && 1 < bt->key.size() ) || isLeftmost && !isRightmost ) && 0 == k )            printf ( "└─" );
+      if ( ( ( 0 == depth && 1 < bt->key.size() ) || (!isLeftmost && isRightmost) ) && bt->key.size() - 1 == k ) printf ( "┌─" );
+      else if ( ( ( 0 == depth && 1 < bt->key.size() ) || (isLeftmost && !isRightmost) ) && 0 == k )            printf ( "└─" );
       else                                                                                               printf ( "├─" );
       print ( bt->key[k] ); printf ( "\n" );
       printBTree ( bt->child[k], depth + 1, 0 == k, false, leftmosts, rightmosts ); //递归输出子树

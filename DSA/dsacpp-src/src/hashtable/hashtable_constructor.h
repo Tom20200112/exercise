@@ -11,7 +11,8 @@
 /*DSA*/#include "prime/primeNLT.h"
 
 template <typename K, typename V> Hashtable<K, V>::Hashtable ( int c ) { //创建散列表，容量为
-   M = primeNLT ( c, 1048576, "../../_input/prime-1048576-bitmap.txt" ); //不小于c的素数M
+   std::string s("../../_input/prime-1048576-bitmap.txt" );
+   M = primeNLT ( c, 1048576, s.c_str()); //不小于c的素数M
    N = 0; ht = new Entry<K, V>*[M]; //开辟桶数组（假定成功）
    memset ( ht, 0, sizeof ( Entry<K, V>* ) * M ); //初始化各桶
    removed = new Bitmap ( M ); L = 0; //用Bitmap记录懒惰删除

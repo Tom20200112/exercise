@@ -18,6 +18,7 @@ int testID = 0; //测试编号
  ******************************************************************************************/
 template <typename T> //元素类型
 void TestFind ( Vector<T> & V, int n ) {
+   printf("n = %d, not used\n", n);
    for ( int i = 0; i < V.size(); i++ ) { //依次查找向量中元素，当然成功
       T e =  V[i]; print ( e );
       Rank r = V.find ( e );
@@ -42,7 +43,7 @@ void TestFind ( Vector<T> & V, int n ) {
 template <typename T> //元素类型
 void TestSearch ( Vector<T> & V ) {
    for ( int i = 0; i < V.size(); i++ ) { //依次查找向量中元素，当然成功
-      T e =  V[i]; print ( e ); printf(": by ");
+      T e =  V[i]; print<Vector<T>> ( e ); printf(": by ");
       Rank r = V.search ( e );
       if ( V[r] == e ) printf ( "found at rank V[%d] = %d", r, V[r] );
       else printf ( "found at rank V[%d] = %d <> %d\a\a", r, V[r], e );
@@ -51,10 +52,10 @@ void TestSearch ( Vector<T> & V ) {
    for ( int i = 0; i <= V.size(); i++ ) { //依次相邻元素的均值，可能成功
       T a = ( 0 < i ) ? V[i - 1] : V[0] - 4;
       T b = ( i < V.size() ) ? V[i] : V[V.size()-1] + 4;
-      T e =  ( a + b ) / 2; print ( e ); printf(": by ");
+      T e =  ( a + b ) / 2; print<Vector<T>> ( e ); printf(": by ");
       Rank r = V.search ( e );
-      printf ( "V[%3d] =", r ); ( r < 0 ) ? print ( "-INF" ) : print ( V[r] ); printf ( "  ~  " );
-      printf ( "V[%3d] =", r + 1 ); ( r + 1 < V.size() ) ? print ( V[r + 1] ) : print ( "+INF" );
+      printf ( "V[%3d] =", r ); ( r < 0 ) ? print ( "-INF" ) : print<Vector<T>> ( V[r] ); printf ( "  ~  " );
+      printf ( "V[%3d] =", r + 1 ); ( r + 1 < V.size() ) ? print<Vector<T>> ( V[r + 1] ) : print ( "+INF" );
       bool ordered = true;
       if ( ( r >= 0 ) && ( V[r] > e ) ) ordered = false;
       if ( ( r + 1 < V.size() ) && ( V[r + 1] <= e ) ) ordered = false;
@@ -70,7 +71,7 @@ template <typename T> //元素类型
 void TestOrderedInsertion ( Vector<T> & V, int n ) {
    while ( n * 2 > V.size() ) {
       T e = dice ( ( T ) n * 2 );
-      printf ( "Inserting " ); print ( e ); printf ( " by " );
+      printf ( "Inserting " ); print<Vector<T>> ( e ); printf ( " by " );
       V.insert ( V.search ( e ) + 1, e );
       print ( V );
    }

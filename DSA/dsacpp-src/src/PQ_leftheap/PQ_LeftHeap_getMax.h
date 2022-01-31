@@ -9,4 +9,4 @@
 #pragma once
 
 template <typename T> T PQ_LeftHeap<T>::getMax()
-{ return _root->data; } //按照此处约定，堆顶即优先级最高的词条
+{ return this->_root->data; } //按照此处约定，堆顶即优先级最高的词条

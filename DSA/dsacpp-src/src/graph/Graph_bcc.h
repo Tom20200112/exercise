@@ -31,7 +31,7 @@ void Graph<Tv, Te>::BCC ( int v, int& clock, Stack<int>& S ) { //assert: 0 <= v 
                /*DSA*/{
                /*DSA*/printf ( "BCC rooted at %c:", vertex ( v ) );
                /*DSA*/Stack<int> temp; do { temp.push ( S.pop() ); print ( vertex ( temp.top() ) ); } while ( u != temp.top() ); print( vertex ( parent(u) ) ); while ( !temp.empty() ) S.push ( temp.pop() );
-               while ( u != S.pop() ); //弹出当前BCC中（除v外）的所有节点，可视需要做进一步处理
+               while ( u != S.pop() ) {} //弹出当前BCC中（除v外）的所有节点，可视需要做进一步处理
                /*DSA*/printf ( "\n" );
                /*DSA*/}
             break;

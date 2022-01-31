@@ -43,7 +43,7 @@ BinNodePosi<T> Splay<T>::splay ( BinNodePosi<T> v ) { //v为因最近访问而�
          ( g == gg->lc ) ? attachAsLC ( v, gg ) : attachAsRC ( gg, v );
       updateHeight ( g ); updateHeight ( p ); updateHeight ( v );
    } //双层伸展结束时，必有g == NULL，但p可能非空
-   if ( p = v->parent ) { //若p果真非空，则额外再做一次单旋
+   if ( (p = v->parent) ) { //若p果真非空，则额外再做一次单旋
       /*DSA*/if ( IsLChild ( *v ) ) { printf ( "\tzIg :" ); print ( p ); print ( v ); printf ( "\n" ); }
       /*DSA*/else              { printf ( "\tzAg :" ); print ( p ); print ( v ); printf ( "\n" ); }
       if ( IsLChild ( *v ) ) { attachAsLC ( v->rc, p ); attachAsRC ( v, p ); }

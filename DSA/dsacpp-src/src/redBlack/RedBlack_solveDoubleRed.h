@@ -15,7 +15,7 @@
  ******************************************************************************************/
 template <typename T> void RedBlack<T>::solveDoubleRed ( BinNodePosi<T> x ) { //x当前必为红
    if ( IsRoot ( *x ) ) //若已（递归）转至树根，则将其转黑，整树黑高度也随之递增
-      {  _root->color = RB_BLACK; _root->height++; return;  } //否则，x的父亲p必存在
+      {  this->_root->color = RB_BLACK; this->_root->height++; return;  } //否则，x的父亲p必存在
    BinNodePosi<T> p = x->parent; if ( IsBlack ( p ) ) return; //若p为黑，则可终止调整。否则
    BinNodePosi<T> g = p->parent; //既然p为红，则x的祖父必存在，且必为黑色
    BinNodePosi<T> u = uncle ( x ); //以下，视x叔父u的颜色分别处理

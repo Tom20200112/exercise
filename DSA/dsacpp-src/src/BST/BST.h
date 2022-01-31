@@ -22,9 +22,9 @@ public: //基本接口：以virtual修饰，强制要求所有派生类（BST变
    virtual BinNodePosi<T> insert ( const T& e ); //插入
    virtual bool remove ( const T& e ); //删除
    /*DSA*/
-   /*DSA*/void stretchToLPath() { stretchByZag ( _root ); } //借助zag旋转，转化为左向单链
-   /*DSA*/void stretchToRPath() { stretchByZig ( _root ); } //借助zig旋转，转化为右向单链
+   /*DSA*/void stretchToLPath() { stretchByZag ( this->_root ); } //借助zag旋转，转化为左向单链
+   /*DSA*/void stretchToRPath() { stretchByZig ( this->_root ); } //借助zig旋转，转化为右向单链
    /*DSA*/void stretch();
 };
 
-#include "BST_implementation.h"
+#include "bst_implementation.h"
