@@ -1,3 +1,0 @@
-/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/build/CMakeFiles/rebuild_cache.dir
-/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/build/CMakeFiles/edit_cache.dir
-/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/build/CMakeFiles/bubblesort.dir

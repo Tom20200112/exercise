@@ -1,3 +1,0 @@
-/Users/tomzhang/exercises/DSA/dsacpp-src/src/vector/build/CMakeFiles/rebuild_cache.dir
-/Users/tomzhang/exercises/DSA/dsacpp-src/src/vector/build/CMakeFiles/edit_cache.dir
-/Users/tomzhang/exercises/DSA/dsacpp-src/src/vector/build/CMakeFiles/vector.dir
