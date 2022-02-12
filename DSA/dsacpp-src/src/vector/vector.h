@@ -13,7 +13,7 @@ using Rank = int;           //秩
 
 template <typename T>
 class Vector {  //向量模板类
-   protected:
+protected:
     Rank _size;
     int _capacity;
     T *_elem;                                     //规模、容量、数据区
@@ -30,7 +30,7 @@ class Vector {  //向量模板类
     Rank partition(Rank lo, Rank hi);             //轴点构造算法
     void quickSort(Rank lo, Rank hi);             //快速排序算法
     void shellSort(Rank lo, Rank hi);             //希尔排序算法
-   public:
+public:
     // 构造函数
     Vector(int c = DEFAULT_CAPACITY, int s = 0, T v = 0)  //容量为c、规模为s、所有元素初始为v
     {
@@ -73,9 +73,9 @@ class Vector {  //向量模板类
     int deduplicate();                                    //无序去重
     int uniquify();                                       //有序去重
                                                           // 遍历
-    void traverse(void (*)(T &));                         //遍历（使用函数指针，只读或局部性修改）
+    void traverse(void (*)(T &)) const;                   //遍历（使用函数指针，只读或局部性修改）
     template <typename VST>
-    void traverse(VST &);  //遍历（使用函数对象，可全局性修改）
-};                         // Vector
+    void traverse(VST &) const;  //遍历（使用函数对象，可全局性修改）
+};                               // Vector
 
 #include "vector_implementation.h"

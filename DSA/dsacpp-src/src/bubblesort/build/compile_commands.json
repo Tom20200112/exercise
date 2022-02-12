@@ -1,0 +1,37 @@
+[
+{
+  "directory": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/..  -O1 -Wall -Wextra -g -fno-omit-frame-pointer -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -std=gnu++11 -o CMakeFiles/bubblesort.dir/bubble.cpp.o -c /Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/bubble.cpp",
+  "file": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/bubble.cpp"
+},
+{
+  "directory": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/..  -O1 -Wall -Wextra -g -fno-omit-frame-pointer -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -std=gnu++11 -o CMakeFiles/bubblesort.dir/bubble2.cpp.o -c /Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/bubble2.cpp",
+  "file": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/bubble2.cpp"
+},
+{
+  "directory": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/..  -O1 -Wall -Wextra -g -fno-omit-frame-pointer -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -std=gnu++11 -o CMakeFiles/bubblesort.dir/bubble1A.cpp.o -c /Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/bubble1A.cpp",
+  "file": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/bubble1A.cpp"
+},
+{
+  "directory": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/..  -O1 -Wall -Wextra -g -fno-omit-frame-pointer -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -std=gnu++11 -o CMakeFiles/bubblesort.dir/bubble1B.cpp.o -c /Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/bubble1B.cpp",
+  "file": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/bubble1B.cpp"
+},
+{
+  "directory": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/..  -O1 -Wall -Wextra -g -fno-omit-frame-pointer -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -std=gnu++11 -o CMakeFiles/bubblesort.dir/main.cpp.o -c /Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/main.cpp",
+  "file": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/main.cpp"
+},
+{
+  "directory": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/..  -O1 -Wall -Wextra -g -fno-omit-frame-pointer -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -std=gnu++11 -o CMakeFiles/bubblesort.dir/Users/tomzhang/exercises/DSA/dsacpp-src/src/UniPrint/print_int_array.cpp.o -c /Users/tomzhang/exercises/DSA/dsacpp-src/src/UniPrint/print_int_array.cpp",
+  "file": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/UniPrint/print_int_array.cpp"
+},
+{
+  "directory": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++   -I/Users/tomzhang/exercises/DSA/dsacpp-src/src/bubblesort/..  -O1 -Wall -Wextra -g -fno-omit-frame-pointer -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -std=gnu++11 -o CMakeFiles/bubblesort.dir/Users/tomzhang/exercises/DSA/dsacpp-src/src/random/Shuffle.cpp.o -c /Users/tomzhang/exercises/DSA/dsacpp-src/src/random/Shuffle.cpp",
+  "file": "/Users/tomzhang/exercises/DSA/dsacpp-src/src/random/Shuffle.cpp"
+}
+]

@@ -1,0 +1,1340 @@
+diff --git a/DSA/dsacpp-src/src/AVL/AVL_insert.h b/DSA/dsacpp-src/src/AVL/AVL_insert.h
+index 6626dab..b60df59 100644
+--- a/DSA/dsacpp-src/src/AVL/AVL_insert.h
++++ b/DSA/dsacpp-src/src/AVL/AVL_insert.h
+@@ -10,9 +10,9 @@
+ 
+ template <typename T> BinNodePosi<T> AVL<T>::insert ( const T& e ) { //将关键码e插入AVL树中
+    BinNodePosi<T> & x = search ( e ); if ( x ) return x; //确认目标节点不存在
+-   BinNodePosi<T> xx = x = new BinNode<T> ( e, _hot ); _size++; //创建新节点x
++   BinNodePosi<T> xx = x = new BinNode<T> ( e, this->_hot ); this->_size++; //创建新节点x
+ // 此时，x的父亲_hot若增高，则其祖父有可能失衡
+-   for ( BinNodePosi<T> g = _hot; g; g = g->parent ) //从x之父出发向上，逐层检查各代祖先g
++   for ( BinNodePosi<T> g = this->_hot; g; g = g->parent ) //从x之父出发向上，逐层检查各代祖先g
+       if ( !AvlBalanced ( *g ) ) { //一旦发现g失衡，则（采用“3 + 4”算法）使之复衡，并将子树
+          FromParentTo ( *g ) = rotateAt ( tallerChild ( tallerChild ( g ) ) ); //重新接入原树
+          break; //局部子树复衡后，高度必然复原；其祖先亦必如此，故调整结束
+diff --git a/DSA/dsacpp-src/src/AVL/AVL_remove.h b/DSA/dsacpp-src/src/AVL/AVL_remove.h
+index 1b716b6..86b5145 100644
+--- a/DSA/dsacpp-src/src/AVL/AVL_remove.h
++++ b/DSA/dsacpp-src/src/AVL/AVL_remove.h
+@@ -10,8 +10,8 @@
+ 
+ template <typename T> bool AVL<T>::remove ( const T& e ) { //从AVL树中删除关键码e
+    BinNodePosi<T> & x = search ( e ); if ( !x ) return false; //确认目标存在（留意_hot的设置）
+-   removeAt ( x, _hot ); _size--; //先按BST规则删除之（此后，原节点之父_hot及其祖先均可能失衡）
+-   for ( BinNodePosi<T> g = _hot; g; g = g->parent ) { //从_hot出发向上，逐层检查各代祖先g
++   removeAt ( x, this->_hot ); this->_size--; //先按BST规则删除之（此后，原节点之父_hot及其祖先均可能失衡）
++   for ( BinNodePosi<T> g = this->_hot; g; g = g->parent ) { //从_hot出发向上，逐层检查各代祖先g
+       if ( !AvlBalanced ( *g ) ) //一旦发现g失衡，则（采用“3 + 4”算法）使之复衡，并将该子树联至
+          g = FromParentTo ( *g ) = rotateAt ( tallerChild ( tallerChild ( g ) ) ); //原父亲
+       updateHeight ( g ); //更新高度（注意：即便g未失衡或已恢复平衡，高度均可能降低）
+diff --git a/DSA/dsacpp-src/src/BST/BST.h b/DSA/dsacpp-src/src/BST/BST.h
+index f4aecab..81cfb41 100644
+--- a/DSA/dsacpp-src/src/BST/BST.h
++++ b/DSA/dsacpp-src/src/BST/BST.h
+@@ -22,9 +22,9 @@ public: //基本接口：以virtual修饰，强制要求所有派生类（BST变
+    virtual BinNodePosi<T> insert ( const T& e ); //插入
+    virtual bool remove ( const T& e ); //删除
+    /*DSA*/
+-   /*DSA*/void stretchToLPath() { stretchByZag ( _root ); } //借助zag旋转，转化为左向单链
+-   /*DSA*/void stretchToRPath() { stretchByZig ( _root ); } //借助zig旋转，转化为右向单链
++   /*DSA*/void stretchToLPath() { stretchByZag ( this->_root ); } //借助zag旋转，转化为左向单链
++   /*DSA*/void stretchToRPath() { stretchByZig ( this->_root ); } //借助zig旋转，转化为右向单链
+    /*DSA*/void stretch();
+ };
+ 
+-#include "BST_implementation.h"
+\ No newline at end of file
++#include "bst_implementation.h"
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/BST/bst_implementation.h b/DSA/dsacpp-src/src/BST/bst_implementation.h
+index 30221c6..7413262 100644
+--- a/DSA/dsacpp-src/src/BST/bst_implementation.h
++++ b/DSA/dsacpp-src/src/BST/bst_implementation.h
+@@ -13,9 +13,9 @@
+ * 效果等同于将这些实现直接汇入BST.h
+ * 在export尚未被编译器支持前，如此可将定义与实现分离，以便课程讲解
+ ******************************************************************************************/
+-#include "BST_search.h" //查找
+-#include "BST_insert.h" //插入
+-#include "BST_removeAt.h" //在子树中删除
+-#include "BST_remove.h" //删除
+-#include "BST_connect34.h"
+-#include "BST_rotateAt.h"
+\ No newline at end of file
++#include "bst_search.h" //查找
++#include "bst_insert.h" //插入
++#include "bst_removeAt.h" //在子树中删除
++#include "bst_remove.h" //删除
++#include "bst_connect34.h"
++#include "bst_rotateAt.h"
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/BST/bst_insert.h b/DSA/dsacpp-src/src/BST/bst_insert.h
+index 4d5ff00..4fc7b08 100644
+--- a/DSA/dsacpp-src/src/BST/bst_insert.h
++++ b/DSA/dsacpp-src/src/BST/bst_insert.h
+@@ -11,7 +11,7 @@
+ template <typename T> BinNodePosi<T> BST<T>::insert ( const T& e ) { //将关键码e插入BST树中
+    BinNodePosi<T> & x = search ( e ); if ( x ) return x; //确认目标不存在（留意对_hot的设置）
+    x = new BinNode<T> ( e, _hot ); //创建新节点x：以e为关键码，以_hot为父
+-   _size++; //更新全树规模
++   this->_size++; //更新全树规模
+    updateHeightAbove ( x ); //更新x及其历代祖先的高度
+    return x; //新插入的节点，必为叶子
+ } //无论e是否存在于原树中，返回时总有x->data == e
+diff --git a/DSA/dsacpp-src/src/BST/bst_remove.h b/DSA/dsacpp-src/src/BST/bst_remove.h
+index 5d625c2..63b3880 100644
+--- a/DSA/dsacpp-src/src/BST/bst_remove.h
++++ b/DSA/dsacpp-src/src/BST/bst_remove.h
+@@ -10,7 +10,7 @@
+ 
+ template <typename T> bool BST<T>::remove ( const T& e ) { //从BST树中删除关键码e
+    BinNodePosi<T> & x = search ( e ); if ( !x ) return false; //确认目标存在（留意_hot的设置）
+-   removeAt ( x, _hot ); _size--; //实施删除
++   removeAt ( x, _hot ); this->_size--; //实施删除
+    updateHeightAbove ( _hot ); //更新_hot及其历代祖先的高度
+    return true;
+ } //删除成功与否，由返回值指示
+diff --git a/DSA/dsacpp-src/src/BST/bst_search.h b/DSA/dsacpp-src/src/BST/bst_search.h
+index 0c7c3ab..5d7e242 100644
+--- a/DSA/dsacpp-src/src/BST/bst_search.h
++++ b/DSA/dsacpp-src/src/BST/bst_search.h
+@@ -9,8 +9,8 @@
+ #pragma once
+ 
+ template <typename T> BinNodePosi<T> & BST<T>::search ( const T & e ) { //在BST中查找关键码e
+-   if ( !_root || e == _root->data ) { _hot = NULL; return _root; } //空树，或恰在树根命中
+-   for ( _hot = _root; ; ) { //否则，自顶而下
++   if ( !this->_root || e == this->_root->data ) { _hot = NULL; return this->_root; } //空树，或恰在树根命中
++   for ( _hot = this->_root; ; ) { //否则，自顶而下
+       BinNodePosi<T> & v = ( e < _hot->data ) ? _hot->lc : _hot->rc; //确定方向，深入一层
+       if ( !v || e == v->data ) return v; _hot = v; //一旦命中或抵达叶子，随即返回
+    } //返回目标节点位置的引用，以便后续插入、删除操作
+diff --git a/DSA/dsacpp-src/src/BTree/BTNode.h b/DSA/dsacpp-src/src/BTree/BTNode.h
+index 1a81879..392dff6 100644
+--- a/DSA/dsacpp-src/src/BTree/BTNode.h
++++ b/DSA/dsacpp-src/src/BTree/BTNode.h
+@@ -16,7 +16,7 @@ template <typename T> struct BTNode { //B-树节点模板类
+ // 成员（为简化描述起见统一开放，读者可根据需要进一步封装）
+    BTNodePosi<T> parent; //父节点
+    Vector<T> key; //关键码向量
+-   Vector<BTNodePosi<T>> child; //孩子向量（其长度总比key多一）
++   Vector<BTNodePosi<T> > child; //孩子向量（其长度总比key多一）
+ // 构造函数（注意：BTNode只能作为根节点创建，而且初始时有0个关键码和1个空孩子指针）
+    BTNode() { parent = NULL; child.insert ( 0, NULL ); }
+    BTNode ( T e, BTNodePosi<T> lc = NULL, BTNodePosi<T> rc = NULL ) {
+diff --git a/DSA/dsacpp-src/src/BTree/BTree.h b/DSA/dsacpp-src/src/BTree/BTree.h
+index edc1d8e..c488ccd 100644
+--- a/DSA/dsacpp-src/src/BTree/BTree.h
++++ b/DSA/dsacpp-src/src/BTree/BTree.h
+@@ -22,8 +22,8 @@ public:
+    BTree ( int order = 3 ) : _order ( order ), _size ( 0 ) //构造函数：默认为最低的3阶
+    { _root = new BTNode<T>(); }
+    ~BTree() { if ( _root ) release ( _root ); } //析构函数：释放所有节点
+-   int const order() { return _order; } //阶次
+-   int const size() { return _size; } //规模
++   int  order() { return _order; } //阶次
++   int  size() { return _size; } //规模
+    BTNodePosi<T> & root() { return _root; } //树根
+    bool empty() const { return !_root; } //判空
+    BTNodePosi<T> search ( const T& e ); //查找
+diff --git a/DSA/dsacpp-src/src/BinTree/BinNode_TravInorder_I1.h b/DSA/dsacpp-src/src/BinTree/BinNode_TravInorder_I1.h
+index f2f1c12..ca8fc60 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinNode_TravInorder_I1.h
++++ b/DSA/dsacpp-src/src/BinTree/BinNode_TravInorder_I1.h
+@@ -8,11 +8,15 @@
+ 
+ #pragma once
+ 
++#include "stack/stack.h"
++
+ template <typename T> //从当前节点出发，沿左分支不断深入，直至没有左分支的节点
+ static void goAlongVine ( BinNodePosi<T> x, Stack<BinNodePosi<T>>& S ) {
+    while ( x ) { S.push ( x ); x = x->lc; } //当前节点入栈后随即向左侧分支深入，迭代直到无左孩子
+ }
+ 
++#include "stack/stack.h"
++
+ template <typename T, typename VST> //元素类型、操作器
+ void travIn_I1 ( BinNodePosi<T> x, VST& visit ) { //二叉树中序遍历算法（迭代版#1）
+    Stack<BinNodePosi<T>> S; //辅助栈
+diff --git a/DSA/dsacpp-src/src/BinTree/BinNode_TravInorder_I2.h b/DSA/dsacpp-src/src/BinTree/BinNode_TravInorder_I2.h
+index e11a617..4def59b 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinNode_TravInorder_I2.h
++++ b/DSA/dsacpp-src/src/BinTree/BinNode_TravInorder_I2.h
+@@ -8,6 +8,8 @@
+ 
+ #pragma once
+ 
++#include "stack/stack.h"
++
+ template <typename T, typename VST> //元素类型、操作器
+ void travIn_I2 ( BinNodePosi<T> x, VST& visit ) { //二叉树中序遍历算法（迭代版#2）
+    Stack<BinNodePosi<T>> S; //辅助栈
+diff --git a/DSA/dsacpp-src/src/BinTree/BinNode_TravPreorder_I1.h b/DSA/dsacpp-src/src/BinTree/BinNode_TravPreorder_I1.h
+index 2b91e24..6f218af 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinNode_TravPreorder_I1.h
++++ b/DSA/dsacpp-src/src/BinTree/BinNode_TravPreorder_I1.h
+@@ -8,6 +8,8 @@
+ 
+ #pragma once
+ 
++#include <stack/stack.h>
++
+ template <typename T, typename VST> //元素类型、操作器
+ void travPre_I1 ( BinNodePosi<T> x, VST& visit ) { //二叉树先序遍历算法（迭代版#1）
+    Stack<BinNodePosi<T>> S; //辅助栈
+diff --git a/DSA/dsacpp-src/src/BinTree/BinNode_TravPreorder_I2.h b/DSA/dsacpp-src/src/BinTree/BinNode_TravPreorder_I2.h
+index 778f013..fce6f7b 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinNode_TravPreorder_I2.h
++++ b/DSA/dsacpp-src/src/BinTree/BinNode_TravPreorder_I2.h
+@@ -8,6 +8,8 @@
+ 
+ #pragma once
+ 
++#include "stack/stack.h"
++
+ //从当前节点出发，沿左分支不断深入，直至没有左分支的节点；沿途节点遇到后立即访问
+ template <typename T, typename VST> //元素类型、操作器
+ static void visitAlongVine ( BinNodePosi<T> x, VST& visit, Stack<BinNodePosi<T>>& S ) {
+@@ -18,6 +20,8 @@ static void visitAlongVine ( BinNodePosi<T> x, VST& visit, Stack<BinNodePosi<T>>
+    }
+ }
+ 
++#include "stack/stack.h"
++
+ template <typename T, typename VST> //元素类型、操作器
+ void travPre_I2 ( BinNodePosi<T> x, VST& visit ) { //二叉树先序遍历算法（迭代版#2）
+    Stack<BinNodePosi<T>> S; //辅助栈
+diff --git a/DSA/dsacpp-src/src/BinTree/BinNode_macro.h b/DSA/dsacpp-src/src/BinTree/BinNode_macro.h
+index dcfe299..74068dc 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinNode_macro.h
++++ b/DSA/dsacpp-src/src/BinTree/BinNode_macro.h
+@@ -8,6 +8,6 @@
+ 
+ #pragma once
+ 
+-#include "BinNode_macro_Basic.h"
++#include "BinNode_macro_BASIC.h"
+ #include "BinNode_macro_AVL.h"
+ #include "BinNode_macro_RedBlack.h"
+diff --git a/DSA/dsacpp-src/src/BinTree/BinNode_macro_BASIC.h b/DSA/dsacpp-src/src/BinTree/BinNode_macro_BASIC.h
+index e854e54..b088f88 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinNode_macro_BASIC.h
++++ b/DSA/dsacpp-src/src/BinTree/BinNode_macro_BASIC.h
+@@ -27,4 +27,4 @@
+ #define sibling( p ) ( IsLChild( * (p) ) ? (p)->parent->rc : (p)->parent->lc ) /*兄弟*/
+ #define uncle( x ) ( sibling( (x)->parent ) ) /*叔叔*/
+ #define FromParentTo( x ) /*来自父亲的引用*/ \
+-   ( IsRoot(x) ? _root : ( IsLChild(x) ? (x).parent->lc : (x).parent->rc ) )
++   ( IsRoot(x) ? this->_root : ( IsLChild(x) ? (x).parent->lc : (x).parent->rc ) )
+diff --git a/DSA/dsacpp-src/src/BinTree/BinNode_travInorder.h b/DSA/dsacpp-src/src/BinTree/BinNode_travInorder.h
+index 5b82ae1..797b441 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinNode_travInorder.h
++++ b/DSA/dsacpp-src/src/BinTree/BinNode_travInorder.h
+@@ -8,15 +8,15 @@
+ 
+ #pragma once
+ 
+-/*DSA*/#include "stack/Stack.h" //引入栈模板类
+-/*DSA*/#include "BinNode_TravInorder_R.h"
++/*DSA*/#include "stack/stack.h" //引入栈模板类
++/*DSA*/#include "BinNode_travInorder_R.h"
+ /*DSA*/#include "BinNode_TravInorder_I1.h"
+ /*DSA*/#include "BinNode_TravInorder_I2.h"
+ /*DSA*/#include "BinNode_TravInorder_I3.h"
+ /*DSA*/#include "BinNode_TravInorder_I4.h"
+ template <typename T> template <typename VST> //元素类型、操作器
+ void BinNode<T>::travIn ( VST& visit ) { //二叉树中序遍历算法统一入口
+-   switch ( rand() % 5 ) { //此处暂随机选择以做测试，共五种选择
++   switch ( ::rand() % 5 ) { //此处暂随机选择以做测试，共五种选择
+       case 1: travIn_I1 ( this, visit ); break; //迭代版#1
+       case 2: travIn_I2 ( this, visit ); break; //迭代版#2
+       case 3: travIn_I3 ( this, visit ); break; //迭代版#3
+diff --git a/DSA/dsacpp-src/src/BinTree/BinNode_travLevel.h b/DSA/dsacpp-src/src/BinTree/BinNode_travLevel.h
+index c74b82f..fc7bdf8 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinNode_travLevel.h
++++ b/DSA/dsacpp-src/src/BinTree/BinNode_travLevel.h
+@@ -11,7 +11,7 @@
+ /*DSA*/#include "queue/queue.h" //引入队列
+ template <typename T> template <typename VST> //元素类型、操作器
+ void BinNode<T>::travLevel ( VST& visit ) { //二叉树层次遍历算法
+-   Queue<BinNodePosi<T>> Q; //辅助队列
++   Queue<BinNodePosi<T> > Q; //辅助队列
+    Q.enqueue ( this ); //根节点入队
+    while ( !Q.empty() ) { //在队列再次变空之前，反复迭代
+       BinNodePosi<T> x = Q.dequeue(); visit ( x->data ); //取出队首节点并访问之
+diff --git a/DSA/dsacpp-src/src/BinTree/BinNode_travPostorder.h b/DSA/dsacpp-src/src/BinTree/BinNode_travPostorder.h
+index 44a6306..2e2a936 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinNode_travPostorder.h
++++ b/DSA/dsacpp-src/src/BinTree/BinNode_travPostorder.h
+@@ -8,12 +8,13 @@
+ 
+ #pragma once
+ 
+-/*DSA*/#include "stack/Stack.h" //引入栈模板类
+-/*DSA*/#include "BinNode_TravPostorder_R.h"
+-/*DSA*/#include "BinNode_TravPostorder_I.h"
++#include <cstdlib>
++/*DSA*/#include "stack/stack.h" //引入栈模板类
++/*DSA*/#include "BinNode_travPostorder_R.h"
++/*DSA*/#include "BinNode_travPostorder_I.h"
+ template <typename T> template <typename VST> //元素类型、操作器
+ void BinNode<T>::travPost ( VST& visit ) { //二叉树后序遍历算法统一入口
+-   switch ( rand() % 2 ) { //此处暂随机选择以做测试，共两种选择
++   switch ( ::rand() % 2 ) { //此处暂随机选择以做测试，共两种选择
+       case 1: travPost_I ( this, visit ); break; //迭代版
+       default: travPost_R ( this, visit ); break; //递归版
+    }
+diff --git a/DSA/dsacpp-src/src/BinTree/BinNode_travPostorder_I.h b/DSA/dsacpp-src/src/BinTree/BinNode_travPostorder_I.h
+index 96548ef..31c5fa2 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinNode_travPostorder_I.h
++++ b/DSA/dsacpp-src/src/BinTree/BinNode_travPostorder_I.h
+@@ -8,8 +8,10 @@
+ 
+ #pragma once
+ 
++#include "stack/stack.h"
++
+ template <typename T> //在以S栈顶节点为根的子树中，找到最高左侧可见叶节点
+-static void gotoLeftmostLeaf ( Stack<BinNodePosi<T>>& S ) { //沿途所遇节点依次入栈
++static void gotoLeftmostLeaf ( Stack<BinNodePosi<T> >& S ) { //沿途所遇节点依次入栈
+    while ( BinNodePosi<T> x = S.top() ) //自顶而下，反复检查当前节点（即栈顶）
+       if ( HasLChild ( *x ) ) { //尽可能向左
+          if ( HasRChild ( *x ) ) S.push ( x->rc ); //若有右孩子，优先入栈
+@@ -19,9 +21,11 @@ static void gotoLeftmostLeaf ( Stack<BinNodePosi<T>>& S ) { //沿途所遇节点
+    S.pop(); //返回之前，弹出栈顶的空节点
+ }
+ 
++#include "stack/stack.h"
++
+ template <typename T, typename VST>
+ void travPost_I ( BinNodePosi<T> x, VST& visit ) { //二叉树的后序遍历（迭代版）
+-   Stack<BinNodePosi<T>> S; //辅助栈
++   Stack<BinNodePosi<T> > S; //辅助栈
+    if ( x ) S.push ( x ); //根节点入栈
+    while ( !S.empty() ) { //x始终为当前节点
+       if ( S.top() != x->parent ) ////若栈顶非x之父（而为右兄）
+diff --git a/DSA/dsacpp-src/src/BinTree/BinNode_travPreorder.h b/DSA/dsacpp-src/src/BinTree/BinNode_travPreorder.h
+index 11a8ecd..f3f362f 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinNode_travPreorder.h
++++ b/DSA/dsacpp-src/src/BinTree/BinNode_travPreorder.h
+@@ -8,13 +8,13 @@
+ 
+ #pragma once
+ 
+-/*DSA*/#include "stack/Stack.h" //引入栈模板类
+-/*DSA*/#include "BinNode_TravPreorder_R.h"
++/*DSA*/#include "stack/stack.h" //引入栈模板类
++/*DSA*/#include "BinNode_travPreorder_R.h"
+ /*DSA*/#include "BinNode_TravPreorder_I1.h"
+ /*DSA*/#include "BinNode_TravPreorder_I2.h"
+ template <typename T> template <typename VST> //元素类型、操作器
+ void BinNode<T>::travPre ( VST& visit ) { //二叉树先序遍历算法统一入口
+-   switch ( rand() % 3 ) { //此处暂随机选择以做测试，共三种选择
++   switch ( ::rand() % 3 ) { //此处暂随机选择以做测试，共三种选择
+       case 1: travPre_I1 ( this, visit ); break; //迭代版#1
+       case 2: travPre_I2 ( this, visit ); break; //迭代版#2
+       default: travPre_R ( this, visit ); break; //递归版
+diff --git a/DSA/dsacpp-src/src/BinTree/BinTree_attach.h b/DSA/dsacpp-src/src/BinTree/BinTree_attach.h
+index fc9836e..dd39db3 100644
+--- a/DSA/dsacpp-src/src/BinTree/BinTree_attach.h
++++ b/DSA/dsacpp-src/src/BinTree/BinTree_attach.h
+@@ -10,14 +10,14 @@
+ 
+ template <typename T> //将S当作节点x的左子树接入二叉树，S本身置空
+ BinNodePosi<T> BinTree<T>::attach ( BinTree<T>* &S, BinNodePosi<T> x ) { //x->lc == NULL
+-   if ( x->lc = S->_root ) x->lc->parent = x; //接入
++   if ( (x->lc = S->_root) ) x->lc->parent = x; //接入
+    _size += S->_size; updateHeightAbove ( x ); //更新全树规模与x所有祖先的高度
+    S->_root = NULL; S->_size = 0; release ( S ); S = NULL; return x; //释放原树，返回接入位置
+ }
+ 
+ template <typename T> //将S当作节点x的右子树接入二叉树，S本身置空
+ BinNodePosi<T> BinTree<T>::attach ( BinNodePosi<T> x, BinTree<T>* &S ) { //x->rc == NULL
+-   if ( x->rc = S->_root ) x->rc->parent = x; //接入
++   if ( (x->rc = S->_root) ) x->rc->parent = x; //接入
+    _size += S->_size; updateHeightAbove ( x ); //更新全树规模与x所有祖先的高度
+    S->_root = NULL; S->_size = 0; release ( S ); S = NULL; return x; //释放原树，返回接入位置
+ }
+diff --git a/DSA/dsacpp-src/src/BitMap/Bitmap.h b/DSA/dsacpp-src/src/BitMap/Bitmap.h
+index 5e5ca71..4a4edba 100644
+--- a/DSA/dsacpp-src/src/BitMap/Bitmap.h
++++ b/DSA/dsacpp-src/src/BitMap/Bitmap.h
+@@ -8,10 +8,11 @@
+ 
+ #pragma once
+ 
+-#pragma warning(disable : 4996 4800)
++// #pragma warning(disable : 4996 4800)
+ #include <cstdlib>
+ #include <cstdio>
+ #include <memory.h>
++#include <cstring>
+ #include "_share/release.h"
+ 
+ class Bitmap { //位图Bitmap类
+@@ -21,7 +22,7 @@ protected:
+    void init ( int n ) { M = new char[N = ( n + 7 ) / 8]; memset ( M, 0, N ); }
+ public:
+    Bitmap ( int n = 8 ) { init ( n ); } //按指定或默认规模创建比特图（为测试暂时选用较小的默认值）
+-   Bitmap ( char* file, int n = 8 ) //按指定或默认规模，从指定文件中读取比特图
++   Bitmap ( const char* file, int n = 8 ) //按指定或默认规模，从指定文件中读取比特图
+    {  init ( n ); FILE* fp = fopen ( file, "r" ); fread ( M, sizeof ( char ), N, fp ); fclose ( fp );  }
+    ~Bitmap() { delete [] M; M = NULL; } //析构时释放比特图空间
+ 
+@@ -41,7 +42,7 @@ public:
+       if ( k < 8 * N ) return; //仍在界内，无需扩容
+       int oldN = N; char* oldM = M;
+       init ( 2 * k ); //与向量类似，加倍策略
+-      memcpy_s ( M, N, oldM, oldN ); delete [] oldM; //原数据转移至新空间
++      ::memcpy( M, oldM, oldN); delete [] oldM; //原数据转移至新空间
+    }
+    /*DSA*/
+    /*DSA*/   void print ( int n ) //逐位打印以检验位图内容，非必需接口
+diff --git a/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap.h b/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap.h
+index a29218d..73f2fc5 100644
+--- a/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap.h
++++ b/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap.h
+@@ -8,12 +8,12 @@
+ 
+ #pragma once
+ 
+-#include "Vector/Vector.h" //借助多重继承机制，基于向量
++#include "vector/vector.h" //借助多重继承机制，基于向量
+ #include "PQ/PQ.h" //按照优先级队列ADT实现的
+ template <typename T> struct PQ_ComplHeap : public PQ<T>, public Vector<T> { //完全二叉堆
+    /*DSA*/friend class UniPrint; //演示输出使用，否则不必设置友类
+    PQ_ComplHeap() { } //默认构造
+-   PQ_ComplHeap ( T* A, Rank n ) { copyFrom ( A, 0, n ); heapify ( _elem, n ); } //批量构造
++   PQ_ComplHeap ( T* A, Rank n ) { copyFrom ( A, 0, n ); heapify ( this->_elem, n ); } //批量构造
+    void insert ( T ); //按照比较器确定的优先级次序，插入词条
+    T getMax(); //读取优先级最高的词条
+    T delMax(); //删除优先级最高的词条
+diff --git a/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_delMax.h b/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_delMax.h
+index 55c4066..c815640 100644
+--- a/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_delMax.h
++++ b/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_delMax.h
+@@ -9,7 +9,7 @@
+ #pragma once
+ 
+ template <typename T> T PQ_ComplHeap<T>::delMax() { //删除非空完全二叉堆中优先级最高的词条
+-   T maxElem = _elem[0]; _elem[0] = _elem[ --_size ]; //摘除堆顶（首词条），代之以末词条
+-   percolateDown ( _elem, _size, 0 ); //对新堆顶实施下滤
++   T maxElem = this->_elem[0]; this->_elem[0] = this->_elem[ --this->_size ]; //摘除堆顶（首词条），代之以末词条
++   percolateDown ( this->_elem, this->_size, 0 ); //对新堆顶实施下滤
+    return maxElem; //返回此前备份的最大词条
+ }
+diff --git a/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_getMax.h b/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_getMax.h
+index 8f38a50..94c9d5c 100644
+--- a/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_getMax.h
++++ b/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_getMax.h
+@@ -8,4 +8,4 @@
+ 
+ #pragma once
+ 
+-template <typename T> T PQ_ComplHeap<T>::getMax() {  return _elem[0];  } //取优先级最高的词条
++template <typename T> T PQ_ComplHeap<T>::getMax() {  return this->_elem[0];  } //取优先级最高的词条
+diff --git a/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_implementation.h b/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_implementation.h
+index cd27902..8f65ecd 100644
+--- a/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_implementation.h
++++ b/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_implementation.h
+@@ -16,9 +16,9 @@
+ #include "_share/release.h"
+ #include "_share/util.h"
+ 
+-#include "PQ_ComplHeap_Insert.h"
++#include "PQ_ComplHeap_insert.h"
+ #include "PQ_ComplHeap_getMax.h"
+ #include "PQ_ComplHeap_delMax.h"
+ #include "PQ_ComplHeap_percolateUp.h"
+ #include "PQ_ComplHeap_percolateDown.h"
+-#include "PQ_ComplHeap_heapify.h"
++#include "PQ_ComplHeap_Heapify.h"
+diff --git a/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_insert.h b/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_insert.h
+index 9b46fb5..36e5935 100644
+--- a/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_insert.h
++++ b/DSA/dsacpp-src/src/PQ_ComplHeap/PQ_ComplHeap_insert.h
+@@ -10,5 +10,5 @@
+ 
+ template <typename T> void PQ_ComplHeap<T>::insert ( T e ) { //将词条插入完全二叉堆中
+    Vector<T>::insert ( e ); //首先将新词条接至向量末尾
+-   percolateUp ( _elem, _size - 1 ); //再对该词条实施上滤调整
++   percolateUp ( this->_elem, this->_size - 1 ); //再对该词条实施上滤调整
+ }
+diff --git a/DSA/dsacpp-src/src/PQ_List/PQ_List.h b/DSA/dsacpp-src/src/PQ_List/PQ_List.h
+index 1460794..1e8a4bc 100644
+--- a/DSA/dsacpp-src/src/PQ_List/PQ_List.h
++++ b/DSA/dsacpp-src/src/PQ_List/PQ_List.h
+@@ -9,13 +9,13 @@
+ #pragma once
+ 
+ #include "PQ/PQ.h" //引入优先级队列ADT
+-#include "List/List.h" //引入列表
++#include "list/list.h" //引入列表
+ template <typename T> class PQ_List : public PQ<T>, public List<T> { //基于列表实现的优先级队列
+    /*DSA*/friend class UniPrint; //演示输出使用，否则不必设置友类
+ public:
+    PQ_List() { } //默认构造
+    PQ_List ( T* E, int n ) { while ( 0 < n-- ) insertAsFirst ( ( E[n] ) ); } //批量构造
+    void insert ( T e ) { insertAsLast ( e ); } //直接将新元素插至队列末尾
+-   T getMax() { return selectMax()->data; } //取出优先级最高的元素
+-   T delMax() { return remove ( selectMax() ); } //删除优先级最高的元素
++   T getMax() { return this->selectMax()->data; } //取出优先级最高的元素
++   T delMax() { return remove ( this->selectMax() ); } //删除优先级最高的元素
+ }; //PQ_List
+diff --git a/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_delMax.h b/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_delMax.h
+index bfb846d..7bd53db 100644
+--- a/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_delMax.h
++++ b/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_delMax.h
+@@ -8,10 +8,12 @@
+ 
+ #pragma once
+ 
++#include "PQ_leftheap/PQ_LeftHeap.h"
++
+ template <typename T> T PQ_LeftHeap<T>::delMax() {
+-   BinNodePosi<T> lHeap = _root->lc; if (lHeap) lHeap->parent = NULL; //左子堆
+-   BinNodePosi<T> rHeap = _root->rc; if (rHeap) rHeap->parent = NULL; //右子堆
+-   T e = _root->data; delete _root; _size--; //删除根节点
+-   _root = merge ( lHeap, rHeap ); //合并原左、右子堆
++   BinNodePosi<T> lHeap = this->_root->lc; if (lHeap) lHeap->parent = NULL; //左子堆
++   BinNodePosi<T> rHeap = this->_root->rc; if (rHeap) rHeap->parent = NULL; //右子堆
++   T e = this->_root->data; delete this->_root; this->_size--; //删除根节点
++   this->_root = merge ( lHeap, rHeap ); //合并原左、右子堆
+    return e; //返回原根节点的数据项
+ }
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_getMax.h b/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_getMax.h
+index fdbe7ed..366faaa 100644
+--- a/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_getMax.h
++++ b/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_getMax.h
+@@ -9,4 +9,4 @@
+ #pragma once
+ 
+ template <typename T> T PQ_LeftHeap<T>::getMax()
+-{ return _root->data; } //按照此处约定，堆顶即优先级最高的词条
+\ No newline at end of file
++{ return this->_root->data; } //按照此处约定，堆顶即优先级最高的词条
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_implementation.h b/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_implementation.h
+index 6065897..526b835 100644
+--- a/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_implementation.h
++++ b/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_implementation.h
+@@ -16,7 +16,7 @@
+ #include "_share/release.h"
+ #include "_share/util.h"
+ 
+-#include "PQ_LeftHeap_Insert.h"
++#include "PQ_LeftHeap_insert.h"
+ #include "PQ_LeftHeap_getMax.h"
+ #include "PQ_LeftHeap_delMax.h"
+-#include "PQ_LeftHeap_Merge.h"
++#include "PQ_LeftHeap_merge.h"
+diff --git a/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_insert.h b/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_insert.h
+index 67f6d4f..322060d 100644
+--- a/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_insert.h
++++ b/DSA/dsacpp-src/src/PQ_leftheap/PQ_LeftHeap_insert.h
+@@ -9,6 +9,6 @@
+ #pragma once
+ 
+ template <typename T> void PQ_LeftHeap<T>::insert ( T e ) {
+-   _root = merge( _root, new BinNode<T>( e, NULL ) ); //将e封装为左式堆，与当前左式堆合并
+-   _size++; //更新规模
++   this->_root = merge( this->_root, new BinNode<T>( e, NULL ) ); //将e封装为左式堆，与当前左式堆合并
++   this->_size++; //更新规模
+ }
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/UniPrint/print.h b/DSA/dsacpp-src/src/UniPrint/print.h
+index e848d6a..d33ae51 100644
+--- a/DSA/dsacpp-src/src/UniPrint/print.h
++++ b/DSA/dsacpp-src/src/UniPrint/print.h
+@@ -11,21 +11,21 @@
+ #include <cstdio> //采用C风格精细控制输出格式
+ #include "huffman/huffChar.h" //Huffman超字符
+ #include "BinTree/BinTree.h" //二叉树
+-#include "Huffman/HuffTree.h" //Huffman树
++#include "huffman/HuffTree.h" //Huffman树
+ #include "BST/BST.h" //二叉搜索树
+ #include "AVL/AVL.h" //AVL树
+-#include "Splay/Splay.h" //伸展树
++#include "splay/Splay.h" //伸展树
+ #include "redBlack/RedBlack.h" //红黑树
+ #include "BTree/BTree.h" //二叉搜索树
+ #include "Entry/Entry.h" //词条
+-#include "Skiplist/Quadlist.h" //四叉表
+-#include "Skiplist/Skiplist.h" //跳转表
+-#include "Hashtable/Hashtable.h" //散列表
++#include "skiplist/QuadList.h" //四叉表
++#include "skiplist/SkipList.h" //跳转表
++#include "hashtable/hashtable.h" //散列表
+ #include "PQ_List/PQ_List.h" //基于列表实现的优先级队列
+ #include "PQ_ComplHeap/PQ_ComplHeap.h" //基于完全堆实现的优先级队列
+-#include "PQ_LeftHeap/PQ_LeftHeap.h" //基于左式堆实现的优先级队列
++#include "PQ_leftheap/PQ_LeftHeap.h" //基于左式堆实现的优先级队列
+ #include "graph/Graph.h" //图
+-#include "graphMatrix/GraphMatrix.h" //基于邻接矩阵实现的图
++#include "graphmatrix/GraphMatrix.h" //基于邻接矩阵实现的图
+ 
+ /******************************************************************************************
+  * 数据元素、数据结构通用输出接口
+diff --git a/DSA/dsacpp-src/src/_share/release.h b/DSA/dsacpp-src/src/_share/release.h
+index 609add4..03618cd 100644
+--- a/DSA/dsacpp-src/src/_share/release.h
++++ b/DSA/dsacpp-src/src/_share/release.h
+@@ -19,6 +19,7 @@
+ 
+ template <typename T> struct Cleaner {
+    static void clean ( T x ) { //相当于递归基
++      x = x;
+ #ifdef _DEBUG
+       static int n = 0;
+       if ( 7 > strlen ( typeid ( T ).name() ) ) { //复杂类型一概忽略，只输出基本类型
+diff --git a/DSA/dsacpp-src/src/_share/util.h b/DSA/dsacpp-src/src/_share/util.h
+index 381076a..a7fb158 100644
+--- a/DSA/dsacpp-src/src/_share/util.h
++++ b/DSA/dsacpp-src/src/_share/util.h
+@@ -28,7 +28,7 @@ using namespace std;
+ 
+ #include "double_Elem.h"
+ #include "increase_Elem.h"
+-#include "hailstone_Elem.h"
++#include "Hailstone_Elem.h"
+ #include "increase_list.h"
+ #include "increase_vector.h"
+ 
+diff --git a/DSA/dsacpp-src/src/graph/Graph_bcc.h b/DSA/dsacpp-src/src/graph/Graph_bcc.h
+index 35cbe76..84dc7bf 100644
+--- a/DSA/dsacpp-src/src/graph/Graph_bcc.h
++++ b/DSA/dsacpp-src/src/graph/Graph_bcc.h
+@@ -31,7 +31,7 @@ void Graph<Tv, Te>::BCC ( int v, int& clock, Stack<int>& S ) { //assert: 0 <= v
+                /*DSA*/{
+                /*DSA*/printf ( "BCC rooted at %c:", vertex ( v ) );
+                /*DSA*/Stack<int> temp; do { temp.push ( S.pop() ); print ( vertex ( temp.top() ) ); } while ( u != temp.top() ); print( vertex ( parent(u) ) ); while ( !temp.empty() ) S.push ( temp.pop() );
+-               while ( u != S.pop() ); //弹出当前BCC中（除v外）的所有节点，可视需要做进一步处理
++               while ( u != S.pop() ) {} //弹出当前BCC中（除v外）的所有节点，可视需要做进一步处理
+                /*DSA*/printf ( "\n" );
+                /*DSA*/}
+             break;
+diff --git a/DSA/dsacpp-src/src/graphmatrix/GraphMatrix.h b/DSA/dsacpp-src/src/graphmatrix/GraphMatrix.h
+index d9a77cd..3b1b88b 100644
+--- a/DSA/dsacpp-src/src/graphmatrix/GraphMatrix.h
++++ b/DSA/dsacpp-src/src/graphmatrix/GraphMatrix.h
+@@ -8,8 +8,8 @@
+ 
+ #pragma once
+ 
+-#include "Vector/Vector.h" //引入向量
+-#include "Graph/Graph.h" //引入图ADT
++#include "vector/vector.h" //引入向量
++#include "graph/Graph.h" //引入图ADT
+ 
+ template <typename Tv> struct Vertex { //顶点对象（为简化起见，并未严格封装）
+    Tv data; int inDegree, outDegree; VStatus status; //数据、出入度数、状态
+@@ -31,19 +31,19 @@ private:
+    Vector< Vertex< Tv > > V; //顶点集（向量）
+    Vector< Vector< Edge< Te > * > > E; //边集（邻接矩阵）
+ public:
+-   GraphMatrix() { n = e = 0; } //构造
++   GraphMatrix() { this->n = this->e = 0; } //构造
+    ~GraphMatrix() { //析构
+-      for ( int j = 0; j < n; j++ ) //所有动态创建的
+-         for ( int k = 0; k < n; k++ ) //边记录
++      for ( int j = 0; j < this->n; j++ ) //所有动态创建的
++         for ( int k = 0; k < this->n; k++ ) //边记录
+             delete E[j][k]; //逐条清除
+    }
+ // 顶点的基本操作：查询第i个顶点（0 <= i < n）
+    virtual Tv& vertex ( int i ) { return V[i].data; } //数据
+    virtual int inDegree ( int i ) { return V[i].inDegree; } //入度
+    virtual int outDegree ( int i ) { return V[i].outDegree; } //出度
+-   virtual int firstNbr ( int i ) { return nextNbr ( i, n ); } //首个邻接顶点
++   virtual int firstNbr ( int i ) { return nextNbr ( i, this->n ); } //首个邻接顶点
+    virtual int nextNbr ( int i, int j ) //相对于顶点j的下一邻接顶点（改用邻接表可提高效率）
+-   { while ( ( -1 < j ) && ( !exists ( i, --j ) ) ); return j; } //逆向线性试探
++   { while ( ( -1 < j ) && ( !exists ( i, --j ) ) ) {}; return j; } //逆向线性试探
+    virtual VStatus& status ( int i ) { return V[i].status; } //状态
+    virtual int& dTime ( int i ) { return V[i].dTime; } //时间标签dTime
+    virtual int& fTime ( int i ) { return V[i].fTime; } //时间标签fTime
+@@ -51,16 +51,16 @@ public:
+    virtual int& priority ( int i ) { return V[i].priority; } //在遍历树中的优先级数
+ // 顶点的动态操作
+    virtual int insert ( Tv const& vertex ) { //插入顶点，返回编号
+-      for ( int j = 0; j < n; j++ ) E[j].insert ( NULL ); n++; //各顶点预留一条潜在的关联边
+-      E.insert ( Vector<Edge<Te>*> ( n, n, ( Edge<Te>* ) NULL ) ); //创建新顶点对应的边向量
++      for ( int j = 0; j < this->n; j++ ) E[j].insert ( NULL ); this->n++; //各顶点预留一条潜在的关联边
++      E.insert ( Vector<Edge<Te>*> ( this->n, this->n, ( Edge<Te>* ) NULL ) ); //创建新顶点对应的边向量
+       return V.insert ( Vertex<Tv> ( vertex ) ); //顶点向量增加一个顶点
+    }
+    virtual Tv remove ( int i ) { //删除第i个顶点及其关联边（0 <= i < n）
+-      for ( int j = 0; j < n; j++ ) //所有出边
+-         if ( exists ( i, j ) ) { delete E[i][j]; V[j].inDegree--; e--; } //逐条删除
+-      E.remove ( i ); n--; //删除第i行
++      for ( int j = 0; j < this->n; j++ ) //所有出边
++         if ( exists ( i, j ) ) { delete E[i][j]; V[j].inDegree--; this->e--; } //逐条删除
++      E.remove ( i ); this->n--; //删除第i行
+       Tv vBak = vertex ( i ); V.remove ( i ); //删除顶点i
+-      for ( int j = 0; j < n; j++ ) //所有入边
++      for ( int j = 0; j < this->n; j++ ) //所有入边
+          if ( Edge<Te> * x = E[j].remove ( i ) ) { delete x; V[j].outDegree--; e--; } //逐条删除
+       return vBak; //返回被删除顶点的信息
+    }
+diff --git a/DSA/dsacpp-src/src/hashtable/hashtable.h b/DSA/dsacpp-src/src/hashtable/hashtable.h
+index 1304a08..18b89c3 100644
+--- a/DSA/dsacpp-src/src/hashtable/hashtable.h
++++ b/DSA/dsacpp-src/src/hashtable/hashtable.h
+@@ -9,7 +9,7 @@
+ #pragma once
+ 
+ #include "Dictionary/Dictionary.h" //引入词典ADT
+-#include "Bitmap/Bitmap.h" //引入位图
++#include "BitMap/Bitmap.h" //引入位图
+ 
+ template <typename K, typename V> //key、value
+ class Hashtable : public Dictionary<K, V> { //符合Dictionary接口的Hashtable模板类
+@@ -31,4 +31,4 @@ public:
+    bool remove ( K k ); //删除
+ };
+ 
+-#include "Hashtable_implementation.h"
++#include "hashtable_implementation.h"
+diff --git a/DSA/dsacpp-src/src/hashtable/hashtable_constructor.h b/DSA/dsacpp-src/src/hashtable/hashtable_constructor.h
+index 1e56a73..3d59b86 100644
+--- a/DSA/dsacpp-src/src/hashtable/hashtable_constructor.h
++++ b/DSA/dsacpp-src/src/hashtable/hashtable_constructor.h
+@@ -11,7 +11,8 @@
+ /*DSA*/#include "prime/primeNLT.h"
+ 
+ template <typename K, typename V> Hashtable<K, V>::Hashtable ( int c ) { //创建散列表，容量为
+-   M = primeNLT ( c, 1048576, "../../_input/prime-1048576-bitmap.txt" ); //不小于c的素数M
++   std::string s("../../_input/prime-1048576-bitmap.txt" );
++   M = primeNLT ( c, 1048576, s.c_str()); //不小于c的素数M
+    N = 0; ht = new Entry<K, V>*[M]; //开辟桶数组（假定成功）
+    memset ( ht, 0, sizeof ( Entry<K, V>* ) * M ); //初始化各桶
+    removed = new Bitmap ( M ); L = 0; //用Bitmap记录懒惰删除
+diff --git a/DSA/dsacpp-src/src/hashtable/hashtable_implementation.h b/DSA/dsacpp-src/src/hashtable/hashtable_implementation.h
+index e1e59b9..58b424f 100644
+--- a/DSA/dsacpp-src/src/hashtable/hashtable_implementation.h
++++ b/DSA/dsacpp-src/src/hashtable/hashtable_implementation.h
+@@ -17,12 +17,12 @@
+ #include "_share/release.h"
+ #include "_share/util.h"
+ 
+-#include "Hashtable_constructor.h"
+-#include "Hashtable_destructor.h"
+-#include "Hashtable_hashCode.h"
+-#include "Hashtable_probe4Hit.h"
+-#include "Hashtable_probe4Free.h"
+-#include "Hashtable_get.h"
+-#include "Hashtable_put.h"
+-#include "Hashtable_remove.h"
+-#include "Hashtable_rehash.h"
++#include "hashtable_constructor.h"
++#include "hashtable_destructor.h"
++#include "hashtable_hashcode.h"
++#include "hashtable_probe4hit.h"
++#include "hashtable_probe4free.h"
++#include "hashtable_get.h"
++#include "hashtable_put.h"
++#include "hashtable_remove.h"
++#include "hashtable_rehash.h"
+diff --git a/DSA/dsacpp-src/src/list/list.h b/DSA/dsacpp-src/src/list/list.h
+index 1e86073..560a2d3 100644
+--- a/DSA/dsacpp-src/src/list/list.h
++++ b/DSA/dsacpp-src/src/list/list.h
+@@ -67,4 +67,4 @@ public:
+    void traverse ( VST& ); //遍历，依次实施visit操作（函数对象，可全局性修改）
+ }; //List
+ 
+-#include "List_implementation.h"
++#include "list_implementation.h"
+diff --git a/DSA/dsacpp-src/src/list/list_implementation.h b/DSA/dsacpp-src/src/list/list_implementation.h
+index da99123..751330d 100644
+--- a/DSA/dsacpp-src/src/list/list_implementation.h
++++ b/DSA/dsacpp-src/src/list/list_implementation.h
+@@ -16,35 +16,35 @@
+ #include "_share/release.h"
+ #include "_share/util.h"
+ 
+-#include "ListNode.h"
++#include "listNode.h"
+ 
+-#include "List_bracket.h"
++#include "list_bracket.h"
+ 
+-#include "List_initialize.h"
+-#include "List_copyNodes.h"
+-#include "List_constructor_by_copying.h"
+-#include "List_destructor.h"
++#include "list_initialize.h"
++#include "list_copyNodes.h"
++#include "list_constructor_by_copying.h"
++#include "list_destructor.h"
+ 
+-#include "List_find.h"
+-#include "List_search.h"
++#include "list_find.h"
++#include "list_search.h"
+ 
+-#include "List_insert.h"
+-#include "List_remove.h"
+-#include "List_clear.h"
++#include "list_insert.h"
++#include "list_remove.h"
++#include "list_clear.h"
+ 
+-#include "List_traverse.h"
++#include "list_traverse.h"
+ 
+-#include "List_sort.h"
+-#include "List_insertionSort.h"
+-#include "List_selectMax.h"
+-#include "List_selectionSort.h"
+-#include "List_merge.h"
+-#include "List_mergeSort.h"
+-#include "List_radixSort.h"
++#include "list_sort.h"
++#include "list_insertionsort.h"
++#include "list_selectMax.h"
++#include "list_SelectionSort.h"
++#include "list_merge.h"
++#include "list_mergesort.h"
++#include "list_RadixSort.h"
+ 
+-#include "List_deduplicate.h"
+-#include "List_uniquify.h"
++#include "list_deduplicate.h"
++#include "list_uniquify.h"
+ 
+-#include "List_reverse1.h"
+-//#include "List_reverse2.h"
+-//#include "List_reverse3.h"
++#include "list_reverse1.h"
++//#include "list_reverse2.h"
++//#include "list_reverse3.h"
+diff --git a/DSA/dsacpp-src/src/prime/primeNLT.cpp b/DSA/dsacpp-src/src/prime/primeNLT.cpp
+index 4b0928b..29c38b4 100644
+--- a/DSA/dsacpp-src/src/prime/primeNLT.cpp
++++ b/DSA/dsacpp-src/src/prime/primeNLT.cpp
+@@ -8,7 +8,7 @@
+ 
+ /*DSA*/#include "Bitmap/Bitmap.h"
+ 
+-int primeNLT ( int c, int n, char* file ) { //根据file文件中的记录，在[c, n)内取最小的素数
++int primeNLT ( int c, int n, const char* file ) { //根据file文件中的记录，在[c, n)内取最小的素数
+    Bitmap B ( file, n ); //file已经按位图格式记录了n以内的所有素数，因此只要
+    while ( c < n ) //从c开始，逐位地
+       if ( B.test ( c ) ) c++; //测试，即可
+diff --git a/DSA/dsacpp-src/src/prime/primeNLT.h b/DSA/dsacpp-src/src/prime/primeNLT.h
+index 212c4ee..27c847f 100644
+--- a/DSA/dsacpp-src/src/prime/primeNLT.h
++++ b/DSA/dsacpp-src/src/prime/primeNLT.h
+@@ -8,4 +8,4 @@
+ 
+ #pragma once
+ 
+-int primeNLT ( int low, int n, char* file ); //根据file文件中的记录，在[low, n)内取最小的素数
+\ No newline at end of file
++int primeNLT ( int low, int n, const char* file ); //根据file文件中的记录，在[low, n)内取最小的素数
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/redBlack/RedBlack_insert.h b/DSA/dsacpp-src/src/redBlack/RedBlack_insert.h
+index 3391343..61df756 100644
+--- a/DSA/dsacpp-src/src/redBlack/RedBlack_insert.h
++++ b/DSA/dsacpp-src/src/redBlack/RedBlack_insert.h
+@@ -10,6 +10,6 @@
+ 
+ template <typename T> BinNodePosi<T> RedBlack<T>::insert ( const T& e ) { //将e插入红黑树
+    BinNodePosi<T> & x = search ( e ); if ( x ) return x; //确认目标不存在（留意对_hot的设置）
+-   x = new BinNode<T> ( e, _hot, NULL, NULL, 0 ); _size++; //创建红节点x：以_hot为父，黑高度0
++   x = new BinNode<T> ( e, this->_hot, NULL, NULL, 0 ); this->_size++; //创建红节点x：以_hot为父，黑高度0
+    BinNodePosi<T> xOld = x; solveDoubleRed ( x ); return xOld; //经双红修正后，即可返回
+ } //无论e是否存在于原树中，返回时总有x->data == e
+diff --git a/DSA/dsacpp-src/src/redBlack/RedBlack_remove.h b/DSA/dsacpp-src/src/redBlack/RedBlack_remove.h
+index afb1891..9dec5ff 100644
+--- a/DSA/dsacpp-src/src/redBlack/RedBlack_remove.h
++++ b/DSA/dsacpp-src/src/redBlack/RedBlack_remove.h
+@@ -10,12 +10,12 @@
+ 
+ template <typename T> bool RedBlack<T>::remove ( const T& e ) { //从红黑树中删除关键码e
+    BinNodePosi<T> & x = search ( e ); if ( !x ) return false; //确认目标存在（留意_hot的设置）
+-   BinNodePosi<T> r = removeAt ( x, _hot ); if ( ! ( --_size ) ) return true; //实施删除
++   BinNodePosi<T> r = removeAt ( x, this->_hot ); if ( ! ( --this->_size ) ) return true; //实施删除
+ // assert: _hot某一孩子刚被删除，且被r所指节点（可能是NULL）接替。以下检查是否失衡，并做必要调整
+-   if ( ! _hot ) //若刚被删除的是根节点，则将其置黑，并更新黑高度
+-      { _root->color = RB_BLACK; updateHeight ( _root ); return true; }
++   if ( ! this->_hot ) //若刚被删除的是根节点，则将其置黑，并更新黑高度
++      { this->_root->color = RB_BLACK; updateHeight ( this->_root ); return true; }
+ // assert: 以下，原x（现r）必非根，_hot必非空
+-   if ( BlackHeightUpdated ( *_hot ) ) return true; //若所有祖先的黑深度依然平衡，则无需调整
++   if ( BlackHeightUpdated ( *(this->_hot) ) ) return true; //若所有祖先的黑深度依然平衡，则无需调整
+    if ( IsRed ( r ) ) //否则，若r为红，则只需令其转黑
+       { r->color = RB_BLACK; r->height++; return true; }
+ // assert: 以下，原x（现r）均为黑色
+diff --git a/DSA/dsacpp-src/src/redBlack/RedBlack_solveDoubleBlack.h b/DSA/dsacpp-src/src/redBlack/RedBlack_solveDoubleBlack.h
+index 27211f5..0a326db 100644
+--- a/DSA/dsacpp-src/src/redBlack/RedBlack_solveDoubleBlack.h
++++ b/DSA/dsacpp-src/src/redBlack/RedBlack_solveDoubleBlack.h
+@@ -17,7 +17,7 @@
+  *    BB-3 ：2次颜色翻转，2次黑高度更新，1次旋转，转为BB-1或BB2R
+  ******************************************************************************************/
+ template <typename T> void RedBlack<T>::solveDoubleBlack ( BinNodePosi<T> r ) {
+-   BinNodePosi<T> p = r ? r->parent : _hot; if ( !p ) return; //r的父亲
++   BinNodePosi<T> p = r ? r->parent : this->_hot; if ( !p ) return; //r的父亲
+    BinNodePosi<T> s = ( r == p->lc ) ? p->rc : p->lc; //r的兄弟
+    if ( IsBlack ( s ) ) { //兄弟s为黑
+       BinNodePosi<T> t = NULL; //s的红孩子（若左、右孩子皆红，左者优先；皆黑时为NULL）
+@@ -49,7 +49,7 @@ template <typename T> void RedBlack<T>::solveDoubleBlack ( BinNodePosi<T> r ) {
+       //*DSA*/printf("  case BB-3: sibling ("); print(s); printf(" is RED\n"); //s红（双子俱黑）
+       s->color = RB_BLACK; p->color = RB_RED; //s转黑，p转红
+       BinNodePosi<T> t = IsLChild ( *s ) ? s->lc : s->rc; //取t与其父s同侧
+-      _hot = p; FromParentTo ( *p ) = rotateAt ( t ); //对t及其父亲、祖父做平衡调整
++      this->_hot = p; FromParentTo ( *p ) = rotateAt ( t ); //对t及其父亲、祖父做平衡调整
+       //*DSA*/printBinTree<T>(s, 0, 0);
+       solveDoubleBlack ( r ); //继续修正r处双黑——此时的p已转红，故后续只能是BB-1或BB-2R
+    }
+diff --git a/DSA/dsacpp-src/src/redBlack/RedBlack_solveDoubleRed.h b/DSA/dsacpp-src/src/redBlack/RedBlack_solveDoubleRed.h
+index a26e9a4..a66b478 100644
+--- a/DSA/dsacpp-src/src/redBlack/RedBlack_solveDoubleRed.h
++++ b/DSA/dsacpp-src/src/redBlack/RedBlack_solveDoubleRed.h
+@@ -15,7 +15,7 @@
+  ******************************************************************************************/
+ template <typename T> void RedBlack<T>::solveDoubleRed ( BinNodePosi<T> x ) { //x当前必为红
+    if ( IsRoot ( *x ) ) //若已（递归）转至树根，则将其转黑，整树黑高度也随之递增
+-      {  _root->color = RB_BLACK; _root->height++; return;  } //否则，x的父亲p必存在
++      {  this->_root->color = RB_BLACK; this->_root->height++; return;  } //否则，x的父亲p必存在
+    BinNodePosi<T> p = x->parent; if ( IsBlack ( p ) ) return; //若p为黑，则可终止调整。否则
+    BinNodePosi<T> g = p->parent; //既然p为红，则x的祖父必存在，且必为黑色
+    BinNodePosi<T> u = uncle ( x ); //以下，视x叔父u的颜色分别处理
+diff --git a/DSA/dsacpp-src/src/skiplist/QuadList.h b/DSA/dsacpp-src/src/skiplist/QuadList.h
+index 3fc1305..62ac613 100644
+--- a/DSA/dsacpp-src/src/skiplist/QuadList.h
++++ b/DSA/dsacpp-src/src/skiplist/QuadList.h
+@@ -8,7 +8,7 @@
+ 
+ #pragma once
+ 
+-#include "QuadlistNode.h" //引入Quadlist节点类
++#include "QuadListNode.h" //引入Quadlist节点类
+ template <typename T> class Quadlist { //Quadlist模板类
+ private:
+    int _size; QListNodePosi<T> header, trailer; //规模、头哨兵、尾哨兵
+@@ -37,4 +37,4 @@ public:
+    void traverse ( VST& ); //遍历各节点，依次实施指定操作（函数对象，可全局性修改节点）
+ }; //Quadlist
+ 
+-#include "Quadlist_implementation.h"
+\ No newline at end of file
++#include "QuadList_implementation.h"
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/skiplist/QuadListNode.h b/DSA/dsacpp-src/src/skiplist/QuadListNode.h
+index 7ce86ce..f31dcdb 100644
+--- a/DSA/dsacpp-src/src/skiplist/QuadListNode.h
++++ b/DSA/dsacpp-src/src/skiplist/QuadListNode.h
+@@ -23,4 +23,4 @@ template <typename T> struct QuadlistNode { //QuadlistNode模板类
+    ( T const& e, QListNodePosi<T> b = NULL );
+ };
+ 
+-#include "QuadlistNode_implementation.h"
+\ No newline at end of file
++#include "QuadListNode_implementation.h"
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/skiplist/QuadListNode_implementation.h b/DSA/dsacpp-src/src/skiplist/QuadListNode_implementation.h
+index 3faad33..394954e 100644
+--- a/DSA/dsacpp-src/src/skiplist/QuadListNode_implementation.h
++++ b/DSA/dsacpp-src/src/skiplist/QuadListNode_implementation.h
+@@ -13,4 +13,4 @@
+  * 效果等同于将这些实现直接汇入QuadlistNode.h
+  * 在export尚未被编译器支持前，如此可将定义与实现分离，以便课程讲解
+  ******************************************************************************************/
+-#include "QuadlistNode_insert.h"
++#include "QuadListNode_insert.h"
+diff --git a/DSA/dsacpp-src/src/skiplist/QuadList_implementation.h b/DSA/dsacpp-src/src/skiplist/QuadList_implementation.h
+index 113bfa4..7b461d3 100644
+--- a/DSA/dsacpp-src/src/skiplist/QuadList_implementation.h
++++ b/DSA/dsacpp-src/src/skiplist/QuadList_implementation.h
+@@ -14,11 +14,11 @@
+  * 在export尚未被编译器支持前，如此可将定义与实现分离，以便课程讲解
+  ******************************************************************************************/
+ 
+-#include "Quadlist_initialize.h"
++#include "QuadList_initialize.h"
+ 
+-#include "Quadlist_insert.h"
+-#include "Quadlist_remove.h"
++#include "QuadList_insert.h"
++#include "QuadList_remove.h"
+ 
+-//#include "Quadlist_search.h"
++//#include "QuadList_search.h"
+ 
+-#include "Quadlist_traverse.h"
++#include "QuadList_traverse.h"
+diff --git a/DSA/dsacpp-src/src/skiplist/SkipList.h b/DSA/dsacpp-src/src/skiplist/SkipList.h
+index 7ad744d..766ad36 100644
+--- a/DSA/dsacpp-src/src/skiplist/SkipList.h
++++ b/DSA/dsacpp-src/src/skiplist/SkipList.h
+@@ -8,25 +8,25 @@
+ 
+ #pragma once
+ 
+-#include "List/List.h" //引入列表
++#include "list/list.h" //引入列表
+ #include "Entry/Entry.h" //引入词条
+-#include "Quadlist.h" //引入Quadlist
++#include "QuadList.h" //引入Quadlist
+ #include "Dictionary/Dictionary.h" //引入词典
+ 
+ template <typename K, typename V> //key、value
+ //符合Dictionary接口的Skiplist模板类（但隐含假设元素之间可比较大小）
+-class Skiplist : public Dictionary<K, V>, public List<Quadlist<Entry<K, V>>*> {
++class Skiplist : public Dictionary<K, V>, public List<Quadlist<Entry<K, V> >*> {
+ protected:
+    bool skipSearch (
+-      ListNode<Quadlist<Entry<K, V>>*>* &qlist,
+-      QuadlistNode<Entry<K, V>>* &p,
++      ListNode<Quadlist<Entry<K, V> >*>* &qlist,
++      QuadlistNode<Entry<K, V> >* &p,
+       K& k );
+ public:
+-   int size() const { return empty() ? 0 : last()->data->size(); } //底层Quadlist的规模
+-   int level() { return List::size(); } //层高 == #Quadlist，不一定要开放
++   int size() const { return this->empty() ? 0 : this->last()->data->size(); } //底层Quadlist的规模
++   int level() { return this->size(); } //层高 == #Quadlist，不一定要开放
+    bool put ( K, V ); //插入（注意与Map有别——Skiplist允许词条重复，故必然成功）
+    V* get ( K k ); //读取
+    bool remove ( K k ); //删除
+ };
+ 
+-#include "Skiplist_implementation.h"
+\ No newline at end of file
++#include "SkipList_implementation.h"
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/skiplist/SkipList_get.h b/DSA/dsacpp-src/src/skiplist/SkipList_get.h
+index 0d444fb..22dae3f 100644
+--- a/DSA/dsacpp-src/src/skiplist/SkipList_get.h
++++ b/DSA/dsacpp-src/src/skiplist/SkipList_get.h
+@@ -8,9 +8,11 @@
+ 
+ #pragma once
+ 
++#include "skiplist/SkipList.h"
++
+ template <typename K, typename V> V* Skiplist<K, V>::get ( K k ) { //跳转表词条查找算法
+-   if ( empty() ) return NULL;
+-   ListNode<Quadlist<Entry<K, V>>*>* qlist = first(); //从顶层Quadlist的
+-   QuadlistNode<Entry<K, V>>* p = qlist->data->first(); //首节点开始
++   if ( this->empty() ) return NULL;
++   ListNode<Quadlist<Entry<K, V> >*>* qlist = this->first(); //从顶层Quadlist的
++   QuadlistNode<Entry<K, V> >* p = qlist->data->first(); //首节点开始
+    return skipSearch ( qlist, p, k ) ? & ( p->entry.value ) : NULL; //查找并报告
+ } //有多个命中时靠后者优先
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/skiplist/SkipList_implementation.h b/DSA/dsacpp-src/src/skiplist/SkipList_implementation.h
+index 67425ac..c693dc4 100644
+--- a/DSA/dsacpp-src/src/skiplist/SkipList_implementation.h
++++ b/DSA/dsacpp-src/src/skiplist/SkipList_implementation.h
+@@ -14,7 +14,7 @@
+  * 在export尚未被编译器支持前，如此可将定义与实现分离，以便课程讲解
+  ******************************************************************************************/
+ 
+-#include "Skiplist_get.h"
+-#include "Skiplist_put.h"
+-#include "Skiplist_remove.h"
+-#include "Skiplist_skipSearch.h"
++#include "SkipList_get.h"
++#include "SkipList_put.h"
++#include "SkipList_remove.h"
++#include "SkipList_skipSearch.h"
+diff --git a/DSA/dsacpp-src/src/skiplist/SkipList_put.h b/DSA/dsacpp-src/src/skiplist/SkipList_put.h
+index 5173f13..b31ca25 100644
+--- a/DSA/dsacpp-src/src/skiplist/SkipList_put.h
++++ b/DSA/dsacpp-src/src/skiplist/SkipList_put.h
+@@ -8,19 +8,21 @@
+ 
+ #pragma once
+ 
++#include "skiplist/SkipList.h"
++
+ template <typename K, typename V> bool Skiplist<K, V>::put ( K k, V v ) { //跳转表词条插入算法
+    Entry<K, V> e = Entry<K, V> ( k, v ); //待插入的词条（将被随机地插入多个副本）
+-   if ( empty() ) insertAsFirst ( new Quadlist<Entry<K, V>> ); //插入首个Entry
+-   ListNode<Quadlist<Entry<K, V>>*>* qlist = first(); //从顶层四联表的
+-   QuadlistNode<Entry<K, V>>* p = qlist->data->first(); //首节点出发
++   if ( this->empty() ) insertAsFirst ( new Quadlist<Entry<K, V> > ); //插入首个Entry
++   ListNode<Quadlist<Entry<K, V> >*>* qlist = this->first(); //从顶层四联表的
++   QuadlistNode<Entry<K, V> >* p = qlist->data->first(); //首节点出发
+    if ( skipSearch ( qlist, p, k ) ) //查找适当的插入位置（不大于关键码k的最后一个节点p）
+       while ( p->below ) p = p->below; //若已有雷同词条，则需强制转到塔底
+-   qlist = last(); //以下，紧邻于p的右侧，一座新塔将自底而上逐层生长
+-   QuadlistNode<Entry<K, V>>* b = qlist->data->insertAfterAbove ( e, p ); //新节点b即新塔基座
++   qlist = this->last(); //以下，紧邻于p的右侧，一座新塔将自底而上逐层生长
++   QuadlistNode<Entry<K, V> >* b = qlist->data->insertAfterAbove ( e, p ); //新节点b即新塔基座
+    while ( rand() & 1 ) { //经投掷硬币，若确定新塔需要再长高一层，则
+       while ( qlist->data->valid ( p ) && !p->above ) p = p->pred; //找出不低于此高度的最近前驱
+       if ( !qlist->data->valid ( p ) ) { //若该前驱是header
+-         if ( qlist == first() ) //且当前已是最顶层，则意味着必须
++         if ( qlist == this->first() ) //且当前已是最顶层，则意味着必须
+             insertAsFirst ( new Quadlist<Entry<K, V>> ); //首先创建新的一层，然后
+          p = qlist->pred->data->first()->pred; //将p转至上一层Skiplist的header
+       } else //否则，可径自
+diff --git a/DSA/dsacpp-src/src/skiplist/SkipList_remove.h b/DSA/dsacpp-src/src/skiplist/SkipList_remove.h
+index 5aee283..7a06b66 100644
+--- a/DSA/dsacpp-src/src/skiplist/SkipList_remove.h
++++ b/DSA/dsacpp-src/src/skiplist/SkipList_remove.h
+@@ -9,16 +9,16 @@
+ #pragma once
+ 
+ template <typename K, typename V> bool Skiplist<K, V>::remove ( K k ) { //跳转表词条删除算法
+-   if ( empty() ) return false; //空表情况
+-   ListNode<Quadlist<Entry<K, V>>*>* qlist = first(); //从顶层Quadlist的
+-   QuadlistNode<Entry<K, V>>* p = qlist->data->first(); //首节点开始
++   if ( this->empty() ) return false; //空表情况
++   ListNode<Quadlist<Entry<K, V> >*>* qlist = this->first(); //从顶层Quadlist的
++   QuadlistNode<Entry<K, V> >* p = qlist->data->first(); //首节点开始
+    if ( !skipSearch ( qlist, p, k ) ) return false; //目标词条不存在，直接返回
+    do { //若目标词条存在，则逐层拆除与之对应的塔
+-      QuadlistNode<Entry<K, V>>* lower = p->below; //记住下一层节点，并
++      QuadlistNode<Entry<K, V> >* lower = p->below; //记住下一层节点，并
+       qlist->data->remove ( p ); //删除当前层节点，再
+       p = lower; qlist = qlist->succ; //转入下一层
+    } while ( qlist->succ ); //如上不断重复，直到塔基
+-   while ( !empty() && first()->data->empty() ) //逐一地
+-      List::remove ( first() ); //清除已可能不含词条的顶层Quadlist
++   while ( !this->empty() && this->first()->data->empty() ) //逐一地
++      this->remove ( this->first() ); //清除已可能不含词条的顶层Quadlist
+    return true; //删除操作成功完成
+ }
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/splay/Splay_insert.h b/DSA/dsacpp-src/src/splay/Splay_insert.h
+index 4c370d6..200c40f 100644
+--- a/DSA/dsacpp-src/src/splay/Splay_insert.h
++++ b/DSA/dsacpp-src/src/splay/Splay_insert.h
+@@ -9,16 +9,16 @@
+ #pragma once
+ 
+ template <typename T> BinNodePosi<T> Splay<T>::insert ( const T& e ) { //将关键码e插入伸展树中
+-   if ( !_root ) { _size++; return _root = new BinNode<T> ( e ); } //处理原树为空的退化情况
+-   if ( e == search ( e )->data ) return _root; //确认目标节点不存在
+-   _size++; BinNodePosi<T> t = _root; //创建新节点。以下调整<=7个指针以完成局部重构
+-   if ( _root->data < e ) { //插入新根，以t和t->rc为左、右孩子
+-      t->parent = _root = new BinNode<T> ( e, NULL, t, t->rc ); //2 + 3个
+-      if ( HasRChild ( *t ) ) { t->rc->parent = _root; t->rc = NULL; } //<= 2个
++   if ( !this->_root ) { this->_size++; return this->_root = new BinNode<T> ( e ); } //处理原树为空的退化情况
++   if ( e == search ( e )->data ) return this->_root; //确认目标节点不存在
++   this->_size++; BinNodePosi<T> t = this->_root; //创建新节点。以下调整<=7个指针以完成局部重构
++   if ( this->_root->data < e ) { //插入新根，以t和t->rc为左、右孩子
++      t->parent = this->_root = new BinNode<T> ( e, NULL, t, t->rc ); //2 + 3个
++      if ( HasRChild ( *t ) ) { t->rc->parent = this->_root; t->rc = NULL; } //<= 2个
+    } else { //插入新根，以t->lc和t为左、右孩子
+-      t->parent = _root = new BinNode<T> ( e, NULL, t->lc, t ); //2 + 3个
+-      if ( HasLChild ( *t ) ) { t->lc->parent = _root; t->lc = NULL; } //<= 2个
++      t->parent = this->_root = new BinNode<T> ( e, NULL, t->lc, t ); //2 + 3个
++      if ( HasLChild ( *t ) ) { t->lc->parent = this->_root; t->lc = NULL; } //<= 2个
+    }
+    updateHeightAbove ( t ); //更新t及其祖先（实际上只有_root一个）的高度
+-   return _root; //新节点必然置于树根，返回之
++   return this->_root; //新节点必然置于树根，返回之
+ } //无论e是否存在于原树中，返回时总有_root->data == e
+diff --git a/DSA/dsacpp-src/src/splay/Splay_remove.h b/DSA/dsacpp-src/src/splay/Splay_remove.h
+index feef4b0..10e0e80 100644
+--- a/DSA/dsacpp-src/src/splay/Splay_remove.h
++++ b/DSA/dsacpp-src/src/splay/Splay_remove.h
+@@ -9,21 +9,21 @@
+ #pragma once
+ 
+ template <typename T> bool Splay<T>::remove ( const T& e ) { //从伸展树中删除关键码e
+-   if ( !_root || ( e != search ( e )->data ) ) return false; //若树空或目标不存在，则无法删除
+-   BinNodePosi<T> w = _root; //assert: 经search()后节点e已被伸展至树根
+-   if ( !HasLChild ( *_root ) ) { //若无左子树，则直接删除
+-      _root = _root->rc; if ( _root ) _root->parent = NULL;
+-   } else if ( !HasRChild ( *_root ) ) { //若无右子树，也直接删除
+-      _root = _root->lc; if ( _root ) _root->parent = NULL;
++   if ( !this->_root || ( e != search ( e )->data ) ) return false; //若树空或目标不存在，则无法删除
++   BinNodePosi<T> w = this->_root; //assert: 经search()后节点e已被伸展至树根
++   if ( !HasLChild ( *(this->_root) ) ) { //若无左子树，则直接删除
++      this->_root = this->_root->rc; if ( this->_root ) this->_root->parent = NULL;
++   } else if ( !HasRChild ( *(this->_root) ) ) { //若无右子树，也直接删除
++      this->_root = this->_root->lc; if ( this->_root ) this->_root->parent = NULL;
+    } else { //若左右子树同时存在，则
+-      BinNodePosi<T> lTree = _root->lc;
+-      lTree->parent = NULL; _root->lc = NULL; //暂时将左子树切除
+-      _root = _root->rc; _root->parent = NULL; //只保留右子树
++      BinNodePosi<T> lTree = this->_root->lc;
++      lTree->parent = NULL; this->_root->lc = NULL; //暂时将左子树切除
++      this->_root = this->_root->rc; this->_root->parent = NULL; //只保留右子树
+       search ( w->data ); //以原树根为目标，做一次（必定失败的）查找
+ ///// assert: 至此，右子树中最小节点必伸展至根，且（因无雷同节点）其左子树必空，于是
+-      _root->lc = lTree; lTree->parent = _root; //只需将原左子树接回原位即可
++      this->_root->lc = lTree; lTree->parent = this->_root; //只需将原左子树接回原位即可
+    }
+-   release ( w->data ); release ( w ); _size--; //释放节点，更新规模
+-   if ( _root ) updateHeight ( _root ); //此后，若树非空，则树根的高度需要更新
++   release ( w->data ); release ( w ); this->_size--; //释放节点，更新规模
++   if ( this->_root ) updateHeight ( this->_root ); //此后，若树非空，则树根的高度需要更新
+    return true; //返回成功标志
+ } //若目标节点存在且被删除，返回true；否则返回false
+diff --git a/DSA/dsacpp-src/src/splay/Splay_search.h b/DSA/dsacpp-src/src/splay/Splay_search.h
+index 960af87..a7ab1d9 100644
+--- a/DSA/dsacpp-src/src/splay/Splay_search.h
++++ b/DSA/dsacpp-src/src/splay/Splay_search.h
+@@ -10,6 +10,6 @@
+ 
+ template <typename T> BinNodePosi<T> & Splay<T>::search ( const T & e ) { //在伸展树中查找e
+    BinNodePosi<T> p = BST<T>::search ( e );
+-   _root = splay ( p ? p : _hot ); //将最后一个被访问的节点伸展至根
+-   return _root;
++   this->_root = splay ( p ? p : this->_hot ); //将最后一个被访问的节点伸展至根
++   return this->_root;
+ } //与其它BST不同，无论查找成功与否，_root都指向最后被访问的节点
+\ No newline at end of file
+diff --git a/DSA/dsacpp-src/src/splay/Splay_splay.h b/DSA/dsacpp-src/src/splay/Splay_splay.h
+index 852c494..a2ff065 100644
+--- a/DSA/dsacpp-src/src/splay/Splay_splay.h
++++ b/DSA/dsacpp-src/src/splay/Splay_splay.h
+@@ -43,7 +43,7 @@ BinNodePosi<T> Splay<T>::splay ( BinNodePosi<T> v ) { //v为因最近访问而
+          ( g == gg->lc ) ? attachAsLC ( v, gg ) : attachAsRC ( gg, v );
+       updateHeight ( g ); updateHeight ( p ); updateHeight ( v );
+    } //双层伸展结束时，必有g == NULL，但p可能非空
+-   if ( p = v->parent ) { //若p果真非空，则额外再做一次单旋
++   if ( (p = v->parent) ) { //若p果真非空，则额外再做一次单旋
+       /*DSA*/if ( IsLChild ( *v ) ) { printf ( "\tzIg :" ); print ( p ); print ( v ); printf ( "\n" ); }
+       /*DSA*/else              { printf ( "\tzAg :" ); print ( p ); print ( v ); printf ( "\n" ); }
+       if ( IsLChild ( *v ) ) { attachAsLC ( v->rc, p ); attachAsRC ( v, p ); }
+diff --git a/DSA/dsacpp-src/src/stack_vector/stack_vector.h b/DSA/dsacpp-src/src/stack_vector/stack_vector.h
+index 13dda82..d3e96a1 100644
+--- a/DSA/dsacpp-src/src/stack_vector/stack_vector.h
++++ b/DSA/dsacpp-src/src/stack_vector/stack_vector.h
+@@ -8,10 +8,11 @@
+ 
+ #pragma once
+ 
+-#include "Vector/Vector.h" //以向量为基类，派生出栈模板类
++#include "vector/vector.h" //以向量为基类，派生出栈模板类
++
+ template <typename T> class Stack: public Vector<T> { //将向量的首/末端作为栈底/顶
+ public: //原有接口一概沿用
+-   void push ( T const& e ) { insert ( e ); } //入栈：等效于将新元素作为向量的末元素插入
+-   T pop() { return remove ( Vector<T>::size() - 1 ); } //出栈：等效于删除向量的末元素
++   void push ( T const& e ) { this->insert ( e ); } //入栈：等效于将新元素作为向量的末元素插入
++   T pop() { return this->remove ( Vector<T>::size() - 1 ); } //出栈：等效于删除向量的末元素
+    T& top() { return ( *this ) [Vector<T>::size() - 1]; } //取顶：直接返回向量的末元素
+ };
+diff --git a/DSA/dsacpp-src/src/vector/.x.swp b/DSA/dsacpp-src/src/vector/.x.swp
+deleted file mode 100644
+index a9fbd98..0000000
+Binary files a/DSA/dsacpp-src/src/vector/.x.swp and /dev/null differ
+diff --git a/DSA/dsacpp-src/src/vector/main.cpp b/DSA/dsacpp-src/src/vector/main.cpp
+index 9f4f73f..d487d35 100644
+--- a/DSA/dsacpp-src/src/vector/main.cpp
++++ b/DSA/dsacpp-src/src/vector/main.cpp
+@@ -42,7 +42,7 @@ void TestFind ( Vector<T> & V, int n ) {
+ template <typename T> //元素类型
+ void TestSearch ( Vector<T> & V ) {
+    for ( int i = 0; i < V.size(); i++ ) { //依次查找向量中元素，当然成功
+-      T e =  V[i]; print ( e ); printf(": by ");
++      T e =  V[i]; print<Vector<T>> ( e ); printf(": by ");
+       Rank r = V.search ( e );
+       if ( V[r] == e ) printf ( "found at rank V[%d] = %d", r, V[r] );
+       else printf ( "found at rank V[%d] = %d <> %d\a\a", r, V[r], e );
+@@ -51,10 +51,10 @@ void TestSearch ( Vector<T> & V ) {
+    for ( int i = 0; i <= V.size(); i++ ) { //依次相邻元素的均值，可能成功
+       T a = ( 0 < i ) ? V[i - 1] : V[0] - 4;
+       T b = ( i < V.size() ) ? V[i] : V[V.size()-1] + 4;
+-      T e =  ( a + b ) / 2; print ( e ); printf(": by ");
++      T e =  ( a + b ) / 2; print<Vector<T>> ( e ); printf(": by ");
+       Rank r = V.search ( e );
+-      printf ( "V[%3d] =", r ); ( r < 0 ) ? print ( "-INF" ) : print ( V[r] ); printf ( "  ~  " );
+-      printf ( "V[%3d] =", r + 1 ); ( r + 1 < V.size() ) ? print ( V[r + 1] ) : print ( "+INF" );
++      printf ( "V[%3d] =", r ); ( r < 0 ) ? print ( "-INF" ) : print<Vector<T>> ( V[r] ); printf ( "  ~  " );
++      printf ( "V[%3d] =", r + 1 ); ( r + 1 < V.size() ) ? print<Vector<T>> ( V[r + 1] ) : print ( "+INF" );
+       bool ordered = true;
+       if ( ( r >= 0 ) && ( V[r] > e ) ) ordered = false;
+       if ( ( r + 1 < V.size() ) && ( V[r + 1] <= e ) ) ordered = false;
+@@ -70,7 +70,7 @@ template <typename T> //元素类型
+ void TestOrderedInsertion ( Vector<T> & V, int n ) {
+    while ( n * 2 > V.size() ) {
+       T e = dice ( ( T ) n * 2 );
+-      printf ( "Inserting " ); print ( e ); printf ( " by " );
++      printf ( "Inserting " ); print<Vector<T>> ( e ); printf ( " by " );
+       V.insert ( V.search ( e ) + 1, e );
+       print ( V );
+    }
+diff --git a/DSA/dsacpp-src/src/vector/vector_heapSort.h b/DSA/dsacpp-src/src/vector/vector_heapSort.h
+index 191d783..f84a6be 100644
+--- a/DSA/dsacpp-src/src/vector/vector_heapSort.h
++++ b/DSA/dsacpp-src/src/vector/vector_heapSort.h
+@@ -10,7 +10,7 @@
+ 
+ template <typename T> void Vector<T>::heapSort ( Rank lo, Rank hi ) { //0 <= lo < hi <= size
+    /*DSA*/ //printf ( "\tHEAPsort [%3d, %3d)\n", lo, hi );
+-   T* A = _elem + lo; Rank n = hi - lo; heapify( A, n ); //将待排序区间建成一个完全二叉堆，O(n)
++   T* A = _elem + lo; Rank n = hi - lo; this->heapify( A, n ); //将待排序区间建成一个完全二叉堆，O(n)
+    while ( 0 < --n ) //反复地摘除最大元并归入已排序的后缀，直至堆空
+-      { swap( A[0], A[n] ); percolateDown( A, n, 0 ); } //堆顶与末元素对换，再下滤
++      { swap( A[0], A[n] ); this->percolateDown( A, n, 0 ); } //堆顶与末元素对换，再下滤
+ }
+diff --git a/DSA/dsacpp-src/src/vector/vector_implementation.h b/DSA/dsacpp-src/src/vector/vector_implementation.h
+index 93780fb..a75382d 100644
+--- a/DSA/dsacpp-src/src/vector/vector_implementation.h
++++ b/DSA/dsacpp-src/src/vector/vector_implementation.h
+@@ -24,24 +24,24 @@
+ #include "vector_expand.h"
+ #include "vector_shrink.h"
+ 
+-#include "Vector_insert.h"
++#include "vector_insert.h"
+ #include "vector_remove.h"
+ #include "vector_removeInterval.h"
+ 
+-#include "Vector_find.h"
+-#include "Vector_search.h"
+-#include "Vector_search_binary_C.h" //有A、B、C三种版本，C最完善
+-//#include "Vector_search_fibonaccian_A.h" //实用版（但返回值有待与接口统一）
+-#include "Vector_search_fibonaccian_B.h" //华丽版
++#include "vector_find.h"
++#include "vector_search.h"
++#include "vector_search_binary_C.h" //有A、B、C三种版本，C最完善
++//#include "vector_search_fibonaccian_A.h" //实用版（但返回值有待与接口统一）
++#include "vector_search_fibonaccian_B.h" //华丽版
+ 
+-#include "Vector_traverse.h"
++#include "vector_traverse.h"
+ 
+-#include "Vector_unsort.h"
+-#include "Vector_sort.h"
+-//#include "vector_bubbleSort_A.h"
+-//#include "vector_bubbleSort_B.h"
+-#include "vector_bubbleSort_C.h"
+-#include "vector_selectionSort.h"
++#include "vector_unsort.h"
++#include "vector_sort.h"
++//#include "vector_bubblesort_A.h"
++//#include "vector_bubblesort_B.h"
++#include "vector_bubblesort_C.h"
++#include "vector_selectionsort.h"
+ #include "vector_merge.h"
+ #include "vector_mergeSort.h"
+ //#include "vector_partition_LUG.h"
+@@ -54,5 +54,5 @@
+ #include "vector_quickSort_iterative.h"
+ #include "vector_shellSort.h"
+ 
+-#include "Vector_uniquify.h" //或者Vector_uniquify_slow.h
+-#include "Vector_deduplicate.h"
++#include "vector_uniquify.h" //或者Vector_uniquify_slow.h
++#include "vector_deduplicate.h"
+diff --git a/DSA/dsacpp-src/src/vector/vector_search.h b/DSA/dsacpp-src/src/vector/vector_search.h
+index 4e90959..a39dec7 100644
+--- a/DSA/dsacpp-src/src/vector/vector_search.h
++++ b/DSA/dsacpp-src/src/vector/vector_search.h
+@@ -8,6 +8,9 @@
+ 
+ #pragma once
+ 
++#include "vector_search_binary_A.h"
++#include "fibonacci/Fib.h"
++
+ template <typename T> //在有序向量的区间[lo, hi)内，确定不大于e的最后一个节点的秩
+ Rank Vector<T>::search ( T const& e, Rank lo, Rank hi ) const { //assert: 0 <= lo < hi <= _size
+    return ( rand() % 2 ) ? //按各50%的概率随机使用二分查找或Fibonacci查找
