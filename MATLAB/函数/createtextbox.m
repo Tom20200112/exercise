@@ -1,0 +1,13 @@
+function createtextbox(txt1,txt2)
+%CREATETEXTBOX(figure1)
+%  FIGURE1:  annotation figure
+
+%  由 MATLAB 于 20-Nov-2021 15:17:22 自动生成
+
+% 创建 textbox
+annotation('textbox',...
+    [0.209928571428571 0.735714285714286 0.190071428571428 0.152380952380956],...
+    'String',[txt1,sprintf('\n'),txt2],...
+    'LineStyle','none',...
+    'FitBoxToText','off');
+
