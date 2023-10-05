@@ -1,0 +1,9 @@
+Name=T
+Instrument=Janis Temperature
+GPIB=
+channels=[True, True]
+
+Name=B
+Instrument=Janis Magnet
+GPIB=
+channels=[]

@@ -1,0 +1,34 @@
+Name=XXXXX
+Instrument=SR860
+GPIB=11
+channels=[True, True, False, False]
+
+(X, Y, R, Theta)
+
+Name=XXXXX
+Instrument=Yoko
+GPIB=25
+channels=[True, False]
+
+(V, I) Can't do both at the same time
+
+Name=XXXXX
+Instrument=Keithley 2400
+GPIB=27
+channels=[True, False]
+
+(V, I)
+
+Name=T
+Instrument=Janis Temperature
+GPIB=
+channels=[True, True]
+
+(vaporizer, probe)
+
+Name=B
+Instrument=Janis Magnet
+GPIB=
+channels=[]
+
+(Only measures magnetic field, Don't need channel input)

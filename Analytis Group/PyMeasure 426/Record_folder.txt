@@ -1,0 +1,3 @@
+name: bgsweep_ibias_9T_tg18
+folder: C:/Users/thecd/Desktop/Zhiying/device14_MoTe2
+notes: 
